@@ -5,9 +5,9 @@ import json
 import numpy as np
 import tqdm
 
-from openunmix import utils
-from openunmix import predict
-from openunmix import data
+import utils
+import predict
+import data
 
 import argparse
 

@@ -1,4 +1,4 @@
-from openunmix import utils
+import utils
 
 
 def separate(
