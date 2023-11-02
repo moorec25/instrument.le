@@ -23,11 +23,11 @@ The flow would look something like this:
 Main blocks can be pre-processing, neural network, post-processing (this could change).
 Can split up into groups for this.
 
-Carter -
-Cameron - 
-Eric - 
-Vito - 
-Will - 
+Carter - Audio Processing  
+Cameron - Neural Network  
+Eric - Neural Network  
+Vito - Audio Processing  
+Will - Neural Network  
 
 ### Profiling
 Profile the runtime of a test case to see which parts of the audio separation take the longest. Things that take a long time might get priority when it comes to being put onto the FPGA
