@@ -3,7 +3,7 @@
 if [ ! -d "$CAPSTONE_HOME/venv" ]; then
     echo "Creating python venv..."
     cd $CAPSTONE_HOME
-    python3 -m venv venv
+    python3.10 -m venv venv
 fi
 
 source $CAPSTONE_HOME/venv/bin/activate
