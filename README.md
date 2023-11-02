@@ -8,10 +8,9 @@ Clone Repository (SSH)
 ```
 git clone git@github.com:moorec25/instrument.le.git
 ```
-Create venv and install dependencies
+Add the following lines to your bashrc
 ```
-cd instrument.le
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+export CAPSTONE_HOME= (path to instrument.le
+alias activate="source $CAPSTONE_HOME/envsetup.sh"
 ```
+To setup the environment and install all dependencies run the command `activate`. 
