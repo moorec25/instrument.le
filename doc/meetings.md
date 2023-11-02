@@ -1,8 +1,8 @@
 # Nov 2nd
 ## Environment Setup
-Everybody should clone the repo and create a VM if necessary.
-Environment is very simple to setup, just need to add a line or two to your .bashrc. I've provided a shell script that will do all the work of creating the python virtual environment and installing dependencies.
-When working on the python model, make sure the venv is loaded. Just type `activate` into the terminal and it will run the script.
+Everybody should clone the repo and create a VM if necessary.  
+Environment is very simple to setup, just need to add a line or two to your .bashrc. I've provided a shell script that will do all the work of creating the python virtual environment and installing dependencies.  
+When working on the python model, make sure the venv is loaded. Just type `activate` into the terminal and it will run the script.  
 If any more python libraries need to be installed then do the following: Install the library, run `pip freeze > requirements.txt`, then commit and push requirements.txt. When somebody else pulls the updated requirements file and runs `activate` it will install the library.
 
 ## Objectives for Monday Meeting
@@ -11,7 +11,7 @@ If any more python libraries need to be installed then do the following: Install
 
 ## Game plan for next few weeks/month
 ### Create stimulus/logs
-The open-unmix implementation does full end to end separation starting from an input wav file and ending with separated audio. In our design, we will want to have this split into multiple stages.
+The open-unmix implementation does full end to end separation starting from an input wav file and ending with separated audio. In our design, we will want to have this split into multiple stages.  
 Add trace dumps that will give stimulus and expected output of each stage. For example, dump out the spectrogram of the input audio. This spectrogram is the output of the audio pre-processing stage, and the input of the neural network stage. People working on the pre-processing can check their outputs against this trace, and people working on the neural network can use the same trace as input.
 
 The flow would look something like this:
@@ -45,14 +45,14 @@ Things that will need to be done:
 - Lots of other things
 
 ### Learning Resources
-We will need to do some research in our free time regarding what portions of the design we are working on.
-https://www.youtube.com/@ValerioVelardoTheSoundofAI/
+We will need to do some research in our free time regarding what portions of the design we are working on.  
+https://www.youtube.com/@ValerioVelardoTheSoundofAI/  
 This guy on youtube has lots of videos about music and AI. There is lots of content so if you don't want to go through all of it just do the parts that you will be working on the most.
 
 ## Other Design Decisions
 ### Pipelining/Block processing
 
-The open-unmix model processes the entire audio track at once. We will probably run into issues with larger audio files when we are doing this on the FPGA, since there is a limited amount of memory. We should split the audio into blocks and then pipeline the different stages. 
+The open-unmix model processes the entire audio track at once. We will probably run into issues with larger audio files when we are doing this on the FPGA, since there is a limited amount of memory. We should split the audio into blocks and then pipeline the different stages.  
 The type of neural network used in open-unmix (and most audio applications) is a BIDIRECTIONAL LSTM. The audio is looked at both forwards and backwards. This means the system is non-causal and future inputs will effect the output. If we split into blocks and pipeline, we will need to play with the block sizes and see the effect of different block sizes on the separation quality. In short, blocks that are too large will have issues with memory and fitting the design on the FPGA. Blocks that are too short will lower the separation of the audio. Need to find a good middle ground.
 
 ### FPGA Implementation Decisions
