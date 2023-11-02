@@ -11,3 +11,5 @@ source $CAPSTONE_HOME/venv/bin/activate
 echo "Checking requirements"
 pip install -r $CAPSTONE_HOME/requirements.txt | grep "Requirement already satisfied" -v
 
+export OUT_HOME="$CAPSTONE_HOME/out"
+export TEST_HOME="$CAPSTONE_HOME/DSD100subset/Mixtures"
