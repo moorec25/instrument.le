@@ -1,33 +1,32 @@
-#include "fft_common.h"
+#include "twiddle_rom.h"
 
-class TwiddleRom {
+TwiddleRom::TwiddleRom(uint16_t size) {
 
-    private:
-        uint16_t num_twiddles;
-        uint32_t * twiddles;        
-        void generateTwiddles();
+    // Size must be a power of 2
+    assert(std::ceil(log2(size)) == std::floor(log2(size)));
 
-    public:
-        TwiddleRom(uint16_t size) {
-            num_twiddles = size;
-            twiddles = new uint32_t[size];
-            for (int i=0; i<num_twiddles; i++) {
-                twiddles[i] = 0;
-            }
-            generateTwiddles();
-        }
+    num_twiddles = size;
+    twiddles = new uint32_t[size];
 
-        void readTwiddle(uint16_t address, uint16_t &real, uint16_t &imag);
-};
+    generateTwiddles();
+}
+
+TwiddleRom::~TwiddleRom() {
+    delete twiddles;
+}
 
 void TwiddleRom::generateTwiddles() {
-    double pi  = 2 * std::acos(0.0);
 
-    for (int k=0; k<num_twiddles/2; k++) {
-        double real = std::cos(2*pi*k/num_twiddles);
-        double imag = std::sin(2*pi*k/num_twiddles);
-        twiddles[k] |= ((uint32_t) (real * 32767) << 16);
-        twiddles[k] |= (uint32_t) (imag * 32767);
+    double pi = 2 * std::acos(0.0);
+
+    for (int k=0; k<num_twiddles; k++) {
+        double real = std::cos(pi*k/num_twiddles);
+        double imag = std::sin(pi*k/num_twiddles);
+        
+        // Store complex number as two 16 bit ints
+        
+        twiddles[k] = ((uint32_t) (real * 32767) << 16) & 0xffff0000;
+        twiddles[k] |= ((uint32_t) (imag * 32767)) & 0x0000ffff;
     }
 }
 
@@ -40,3 +39,4 @@ void TwiddleRom::readTwiddle(uint16_t address, uint16_t &real, uint16_t &imag) {
     real = (uint16_t) ((twiddle & 0xffff0000) >> 16);
     imag = (uint16_t) (twiddle & 0x0000ffff);
 }
+

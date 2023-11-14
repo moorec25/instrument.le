@@ -4,5 +4,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cassert>
+#include <stdexcept>
 
 #endif
