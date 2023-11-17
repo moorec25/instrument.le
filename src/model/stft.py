@@ -42,6 +42,7 @@ if __name__ == "__main__":
     print('spectrogram shape: {}'.format(spec.shape))
 
     angels_int = (angels * 32767).astype(np.int16)
+    print(np.max(np.abs(angels_int)))
     spec_cust = transforms.stft(angels, frame_size, hop_size)
 
     print('custom spectrogram shape: {}'.format(spec_cust.shape))

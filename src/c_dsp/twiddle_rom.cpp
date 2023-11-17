@@ -25,8 +25,8 @@ void TwiddleRom::generateTwiddles() {
         
         // Store complex number as two 16 bit ints
         
-        twiddles[k] = ((uint32_t) (real * 32767) << 16) & 0xffff0000;
-        twiddles[k] |= ((uint32_t) (imag * 32767)) & 0x0000ffff;
+        twiddles[k] = ((uint32_t) (real * INT16_MAX) << 16) & 0xffff0000;
+        twiddles[k] |= ((uint32_t) (imag * INT16_MAX)) & 0x0000ffff;
     }
 }
 

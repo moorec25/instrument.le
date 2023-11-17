@@ -33,6 +33,8 @@ if __name__ == "__main__":
     frame_size = 4096
     hop_size = 1024
 
+    print(angels[0:10])
+
     print('audio shape: {}'.format(angels.shape))
 
     spec = librosa.stft(angels, n_fft=frame_size, hop_length=hop_size, window=np.hanning)

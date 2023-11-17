@@ -2,7 +2,7 @@ CC=g++
 DEPS = fft_common.h
 ODIR = $(OUT_HOME)/c_dsp
 
-_OBJ = twiddle_rom.o fft.o
+_OBJ = twiddle_rom.o fft.o dualport.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: clean run outdir
