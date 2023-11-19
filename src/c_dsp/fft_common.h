@@ -5,5 +5,7 @@
 #include <cstdint>
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
+#include <cstring>
 
 #endif

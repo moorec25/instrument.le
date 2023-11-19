@@ -12,7 +12,7 @@ class TwiddleRom {
     public:
         TwiddleRom(uint16_t size);
         ~TwiddleRom();
-        void readTwiddle(uint16_t address, uint16_t &real, uint16_t &imag);
+        void readTwiddle(uint16_t address, int16_t &real, int16_t &imag);
 };
 
 #endif

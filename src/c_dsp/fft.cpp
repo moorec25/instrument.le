@@ -2,26 +2,66 @@
 
 int main (int argc, char *argv[]) {
     
-    fftTop();
+    
+    if (argc != 2) {
+        std::cout << "Usage: ./fft <path to test output>\n";
+        exit(1);
+    }
+    
+    char in_file_name[] = "/fft_in.txt";
+    char out_file_name[] = "/fft_out_c.txt";
+    char *test_path = argv[1];
 
-    return 0;
-}
+    char *in_file_path = NULL;
+    char *out_file_path = NULL;
 
-void fftTop() {
+    in_file_path = (char *) malloc(strlen(test_path) + strlen(in_file_name) + 1);
+    out_file_path = (char *) malloc(strlen(test_path) + strlen(out_file_name) + 1);
 
-    TwiddleRom twiddles(N_TWIDDLES);
+    sprintf(in_file_path, "%s%s", test_path, in_file_name);
+    sprintf(out_file_path, "%s%s", test_path, out_file_name);
+
+    FILE * input_file = fopen(in_file_path, "r");
+    FILE * output_file = fopen(out_file_path, "w");
+
+    // Instantiate RAM
     
     DPRAM_64 dpram0(N_FFT);
     DPRAM_64 dpram1(N_FFT);
+
+    loadRam(input_file, dpram0);
+
+    // Perform FFT
+    fftTop(dpram0, dpram1);
+
+    // Write to output file
+    uint8_t levels = (uint8_t) std::log2(N_FFT);
+    if (levels % 2 == 0) {
+        writeOutput(output_file, dpram0);
+    } else {
+        writeOutput(output_file, dpram1);
+    }
+
+    fclose(input_file);
+    fclose(output_file);
+    
+    return 0;
+}
+
+void fftTop(DPRAM_64 &dpram0, DPRAM_64 &dpram1) {
+
+    TwiddleRom twiddles(N_TWIDDLES);
+    
 
     uint8_t readingRam = 0;
     uint8_t writingRam = 1;
 
     uint8_t levels = (uint8_t) std::log2(N_FFT);
 
-    uint32_t addr1, addr2;
+    uint32_t addr1, addr2, addr1Rev, addr2Rev;
     uint32_t real1, imag1, real2, imag2;
-    uint16_t twiddleReal, twiddleImag, twiddleAddr, twiddleMask;
+    uint16_t twiddleAddr, twiddleMask;
+    int16_t twiddleReal, twiddleImag;
     int32_t bflyOutReal1, bflyOutImag1, bflyOutReal2, bflyOutImag2;
 
     for (int i=0; i<levels; i++) {
@@ -31,30 +71,38 @@ void fftTop() {
             addr2 = addr1 + 1;
             rotateLeft(addr1, i, levels);
             rotateLeft(addr2, i, levels);
-            bitReverse(addr1, levels);
-            bitReverse(addr2, levels);
 
-            calcTwiddleMask(twiddleMask, i, levels); 
+            calcTwiddleMask(twiddleMask, i, levels-1); 
             twiddleAddr = twiddleMask & (N_FFT/2-1) & j;
+
+            if (i == 0) {
+                bitReverse(addr1, levels);
+                bitReverse(addr2, levels);
+            }
 
             if (readingRam == 0) {
                 dpram0.memRead(addr1, real1, imag1);
-                dpram0.memRead(addr1, real2, imag2);
+                dpram0.memRead(addr2, real2, imag2);
             } else {
                 dpram1.memRead(addr1, real1, imag1);
-                dpram1.memRead(addr1, real2, imag2);
+                dpram1.memRead(addr2, real2, imag2);
             }
 
             twiddles.readTwiddle(twiddleAddr, twiddleReal, twiddleImag);
 
             butterfly(real1, imag1, real2, imag2, twiddleReal, twiddleImag, bflyOutReal1, bflyOutImag1, bflyOutReal2, bflyOutImag2);
 
+            if (i == 0) {
+                bitReverse(addr1, levels);
+                bitReverse(addr2, levels);
+            }
+
             if (writingRam == 0) {
                 dpram0.memWrite(addr1, bflyOutReal1, bflyOutImag1);
                 dpram0.memWrite(addr2, bflyOutReal2, bflyOutImag2);
             } else {
-                dpram0.memWrite(addr1, bflyOutReal1, bflyOutImag1);
-                dpram0.memWrite(addr2, bflyOutReal2, bflyOutImag2);
+                dpram1.memWrite(addr1, bflyOutReal1, bflyOutImag1);
+                dpram1.memWrite(addr2, bflyOutReal2, bflyOutImag2);
             }
         } 
         readingRam = (readingRam == 0) ? 1 : 0;
@@ -62,7 +110,7 @@ void fftTop() {
     }
 }
 
-void butterfly(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, uint16_t twiddleReal, uint16_t twiddleImag, int32_t &outReal1, int32_t &outImag1, int32_t &outReal2, int32_t &outImag2) {
+void butterfly(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, int32_t twiddleReal, int32_t twiddleImag, int32_t &outReal1, int32_t &outImag1, int32_t &outReal2, int32_t &outImag2) {
 
     int32_t twiddleMultReal;
     int32_t twiddleMultImag;
@@ -92,7 +140,7 @@ void rotateLeft(uint32_t &x, uint32_t y, uint8_t N) {
     
     uint32_t mask = 1;
 
-    for (int i=0; i < (N-1); i++) {
+    for (int i=1; i < N; i++) {
         mask |= (1 << i);
     }
 
@@ -123,4 +171,42 @@ void calcTwiddleMask(uint16_t &mask, uint8_t level, uint8_t N) {
         mask ^= (1 << i);
     }
 
+}
+
+void loadRam(FILE *fp, DPRAM_64 &ram) {
+    
+    uint16_t sample;
+
+    for (int i=0; i<N_FFT; i++) {
+        fscanf(fp, "%hd", &sample);
+        ram.memWrite(i, sample, 0);
+    }
+}
+
+void writeOutput(FILE *fp, DPRAM_64 &ram) {
+
+    uint32_t real, imag;
+
+    for (int i=0; i<N_FFT; i++) {
+        ram.memRead(i, real, imag); 
+        fprintf(fp, "%f %f\n", signExtend(real, 17)/32768.0, signExtend(imag, 17)/32768.0);
+    }
+
+}
+
+int32_t signExtend(uint32_t x, uint8_t N) {
+    
+    uint32_t signMask = 1 << (N-1);
+    uint32_t sign = x & signMask;
+
+    uint32_t valueMask = signMask-1;
+
+    int32_t y = (x & valueMask);
+
+    for (int i=0; i<=(32-N); i++) {
+        y |= sign;
+        sign <<= 1;
+    }
+
+    return y;
 }

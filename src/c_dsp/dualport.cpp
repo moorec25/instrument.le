@@ -34,5 +34,5 @@ void DPRAM_64::memWrite(uint16_t address, uint32_t real, uint32_t imag) {
     assert(address < words);
 
     ram[address] = (((uint64_t) real) << 32 & 0xffffffff00000000);
-    ram[address] = (((uint64_t) real) & 0x00000000ffffffff);
+    ram[address] |= (((uint64_t) imag) & 0x00000000ffffffff);
 }

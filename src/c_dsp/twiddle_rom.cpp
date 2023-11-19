@@ -20,8 +20,8 @@ void TwiddleRom::generateTwiddles() {
     double pi = 2 * std::acos(0.0);
 
     for (int k=0; k<num_twiddles; k++) {
-        double real = std::cos(pi*k/num_twiddles);
-        double imag = std::sin(pi*k/num_twiddles);
+        double real = std::cos(-1*pi*k/num_twiddles);
+        double imag = std::sin(-1*pi*k/num_twiddles);
         
         // Store complex number as two 16 bit ints
         
@@ -30,13 +30,13 @@ void TwiddleRom::generateTwiddles() {
     }
 }
 
-void TwiddleRom::readTwiddle(uint16_t address, uint16_t &real, uint16_t &imag) {
+void TwiddleRom::readTwiddle(uint16_t address, int16_t &real, int16_t &imag) {
     
     assert(address < num_twiddles);
 
     uint32_t twiddle = twiddles[address];
 
-    real = (uint16_t) ((twiddle & 0xffff0000) >> 16);
-    imag = (uint16_t) (twiddle & 0x0000ffff);
+    real = (int16_t) ((twiddle & 0xffff0000) >> 16);
+    imag = (int16_t) (twiddle & 0x0000ffff);
 }
 
