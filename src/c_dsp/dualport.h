@@ -12,8 +12,8 @@ class DPRAM_64 {
     public:
         DPRAM_64(uint16_t size);
         ~DPRAM_64();
-        void memRead(uint16_t address, uint32_t &real, uint32_t &imag);
-        void memWrite(uint16_t address, uint32_t real, uint32_t imag);
+        void memRead(uint16_t address, int32_t &real, int32_t &imag);
+        void memWrite(uint16_t address, int32_t real, int32_t imag);
 };
 
 #endif

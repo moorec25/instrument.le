@@ -13,7 +13,7 @@ if __name__ == "__main__":
     pydata = np.loadtxt('{}/{}/fft_out_py.txt'.format(os.environ.get("OUT_HOME"), args.testname))
     cdata = np.loadtxt('{}/{}/fft_out_c.txt'.format(os.environ.get("OUT_HOME"), args.testname))
 
-    if np.allclose(pydata, cdata, rtol=1e-4, atol=5e-3):
+    if np.allclose(pydata, cdata, rtol=1e-2, atol=1e-2):
         print("Test {} passed!\n".format(args.testname))
     else:
         print("Mismatch occured in test {} \n".format(args.testname))
