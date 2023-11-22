@@ -1,3 +1,10 @@
+# Nov 22nd
+## Tasks
+Carter - Work on signal processing on python
+Vito/Will - Look into openunmix Separator and OpenUnmix classes and figure out how they work
+Eric - Get FPGA board running
+Cameron - Look into quantifying output quality
+
 # Nov 2nd
 ## Environment Setup
 Everybody should clone the repo and create a VM if necessary.  
