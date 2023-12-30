@@ -3,7 +3,7 @@ DEPS = fft_common.h
 BUILDDIR = $(OUT_HOME)/build/c_dsp
 RUNDIR = $(OUT_HOME)/$(TEST_NAME)
 
-_OBJ = twiddle_rom.o fft.o dualport.o
+_OBJ = twiddle_rom.o fft.o dualport.o fft_inf.o
 OBJ = $(patsubst %,$(BUILDDIR)/%,$(_OBJ))
 
 .PHONY: clean run builddir
@@ -11,16 +11,16 @@ OBJ = $(patsubst %,$(BUILDDIR)/%,$(_OBJ))
 
 build: $(BUILDDIR)/fft
 
-$(BUILDDIR)/%.o: %.cpp %.h $(DEPS) | builddir
-	$(CC) -c -o $@ $< -DN_FFT=$(N_FFT)
+$(BUILDDIR)/%.o: %.cpp $(DEPS) | builddir
+	$(CC) $(CFLAGS) -c -o  $@ $< 
 
 $(BUILDDIR)/fft: $(OBJ)
-	$(CC) -o $@ $^
+	$(CC) $(CFLAGS) -o  $@ $^
 
 run: $(RUNDIR)/.cfftdone
 
 $(RUNDIR)/.cfftdone: $(BUILDDIR)/fft | rundir
-	$(BUILDDIR)/fft $(RUNDIR)
+	$(BUILDDIR)/fft $(N_FFT) $(RUNDIR)
 	touch $(RUNDIR)/.cfftdone
 
 rundir:

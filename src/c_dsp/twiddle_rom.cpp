@@ -24,9 +24,11 @@ void TwiddleRom::generateTwiddles() {
         double imag = std::sin(-1*pi*k/num_twiddles);
         
         // Store complex number as two 16 bit ints
-        
-        twiddles[k] = ((uint32_t) (real * INT16_MAX) << 16) & 0xffff0000;
-        twiddles[k] |= ((uint32_t) (imag * INT16_MAX)) & 0x0000ffff;
+        uint16_t real_int = (real > 0) ? real * INT16_MAX : real * (INT16_MAX+1);
+        uint16_t imag_int = (imag > 0) ? imag * INT16_MAX : imag * (INT16_MAX+1);
+        twiddles[k] = ((uint32_t) real_int << 16) & 0xffff0000;
+        twiddles[k] |= ((uint32_t) imag_int) & 0x0000ffff;
+        printf("%x\n", twiddles[k]);
     }
 }
 

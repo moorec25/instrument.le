@@ -1,62 +1,19 @@
 #include "fft.h"
 
-int main (int argc, char *argv[]) {
-    
-    
-    if (argc != 2) {
-        std::cout << "Usage: ./fft <path to test output>\n";
-        exit(1);
-    }
-    
-    char in_file_name[] = "/fft_in.txt";
-    char out_file_name[] = "/fft_out_c.txt";
-    char *test_path = argv[1];
+FFT::FFT(uint16_t size) : 
+    nFFT(size), 
+    dpram0(size), 
+    dpram1(size), 
+    twiddles(size/2),
+    levels ((uint8_t) std::log2(size)) {
 
-    char *in_file_path = NULL;
-    char *out_file_path = NULL;
-
-    in_file_path = (char *) malloc(strlen(test_path) + strlen(in_file_name) + 1);
-    out_file_path = (char *) malloc(strlen(test_path) + strlen(out_file_name) + 1);
-
-    sprintf(in_file_path, "%s%s", test_path, in_file_name);
-    sprintf(out_file_path, "%s%s", test_path, out_file_name);
-
-    FILE * input_file = fopen(in_file_path, "r");
-    FILE * output_file = fopen(out_file_path, "w");
-
-    // Instantiate RAM
-    
-    DPRAM_64 dpram0(N_FFT);
-    DPRAM_64 dpram1(N_FFT);
-
-    loadRam(input_file, dpram0);
-
-    // Perform FFT
-    fftTop(dpram0, dpram1);
-
-    // Write to output file
-    uint8_t levels = (uint8_t) std::log2(N_FFT);
-    if (levels % 2 == 0) {
-        writeOutput(output_file, dpram0);
-    } else {
-        writeOutput(output_file, dpram1);
-    }
-
-    fclose(input_file);
-    fclose(output_file);
-    
-    return 0;
+    assert(std::ceil(log2(size)) == std::floor(log2(size)));
 }
 
-void fftTop(DPRAM_64 &dpram0, DPRAM_64 &dpram1) {
-
-    TwiddleRom twiddles(N_TWIDDLES);
-    
+void FFT::calcFFT() {
 
     uint8_t readingRam = 0;
     uint8_t writingRam = 1;
-
-    uint8_t levels = (uint8_t) std::log2(N_FFT);
 
     uint32_t addr1, addr2, addr1Rev, addr2Rev;
     int32_t real1, imag1, real2, imag2;
@@ -65,7 +22,7 @@ void fftTop(DPRAM_64 &dpram0, DPRAM_64 &dpram1) {
     int32_t bflyOutReal1, bflyOutImag1, bflyOutReal2, bflyOutImag2;
 
     for (int i=0; i<levels; i++) {
-        for (int j=0; j<N_FFT/2; j++) {
+        for (int j=0; j<nFFT/2; j++) {
 
             addr1 = j << 1;
             addr2 = addr1 + 1;
@@ -73,7 +30,7 @@ void fftTop(DPRAM_64 &dpram0, DPRAM_64 &dpram1) {
             rotateLeft(addr2, i, levels);
 
             calcTwiddleMask(twiddleMask, i, levels-1); 
-            twiddleAddr = twiddleMask & (N_FFT/2-1) & j;
+            twiddleAddr = twiddleMask & (nFFT/2-1) & j;
 
             if (i == 0) {
                 bitReverse(addr1, levels);
@@ -110,7 +67,7 @@ void fftTop(DPRAM_64 &dpram0, DPRAM_64 &dpram1) {
     }
 }
 
-void butterfly(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, int32_t twiddleReal, int32_t twiddleImag, int32_t &outReal1, int32_t &outImag1, int32_t &outReal2, int32_t &outImag2) {
+void FFT::butterfly(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, int32_t twiddleReal, int32_t twiddleImag, int32_t &outReal1, int32_t &outImag1, int32_t &outReal2, int32_t &outImag2) {
 
     int64_t twiddleMultReal;
     int64_t twiddleMultImag;
@@ -124,7 +81,7 @@ void butterfly(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag
     outImag2 = inImag1 - (twiddleMultImag >> 15);
 }
 
-void complexMultiply(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, int64_t &outReal, int64_t &outImag) {
+void FFT::complexMultiply(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, int64_t &outReal, int64_t &outImag) {
 
     // Multiply two complex numbers using 3 multipliers
     
@@ -136,7 +93,7 @@ void complexMultiply(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t 
     outImag = K1 + K2;
 }
 
-void rotateLeft(uint32_t &x, uint32_t y, uint8_t N) {
+void FFT::rotateLeft(uint32_t &x, uint32_t y, uint8_t N) {
     
     uint32_t mask = 1;
 
@@ -148,7 +105,7 @@ void rotateLeft(uint32_t &x, uint32_t y, uint8_t N) {
     
 }
 
-void bitReverse(uint32_t &x, uint8_t N) {
+void FFT::bitReverse(uint32_t &x, uint8_t N) {
     
     uint32_t output = 0;
     uint32_t mask = 1 << (N-1);
@@ -163,7 +120,7 @@ void bitReverse(uint32_t &x, uint8_t N) {
     x = output;
 }
 
-void calcTwiddleMask(uint16_t &mask, uint8_t level, uint8_t N) {
+void FFT::calcTwiddleMask(uint16_t &mask, uint8_t level, uint8_t N) {
     
     mask = UINT16_MAX;
 
@@ -173,28 +130,30 @@ void calcTwiddleMask(uint16_t &mask, uint8_t level, uint8_t N) {
 
 }
 
-void loadRam(FILE *fp, DPRAM_64 &ram) {
+void FFT::loadRam(FILE *fp) {
     
     uint16_t sample;
 
-    for (int i=0; i<N_FFT; i++) {
+    for (int i=0; i<nFFT; i++) {
         fscanf(fp, "%hd", &sample);
-        ram.memWrite(i, signExtend(sample, 16), 0);
+        dpram0.memWrite(i, signExtend(sample, 16), 0);
     }
 }
 
-void writeOutput(FILE *fp, DPRAM_64 &ram) {
+void FFT::writeOutput(FILE *fp) {
 
     int32_t real, imag;
 
-    for (int i=0; i<N_FFT; i++) {
-        ram.memRead(i, real, imag); 
-        fprintf(fp, "%f %f\n", real/32768.0, imag/32768.0);
+    DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
+
+    for (int i=0; i<nFFT; i++) {
+        ram.memRead(i, real, imag);
+        fprintf(fp, "%d %d\n", real, imag);
     }
 
 }
 
-int32_t signExtend(uint32_t x, uint8_t N) {
+int32_t FFT::signExtend(uint32_t x, uint8_t N) {
     
     uint32_t signMask = 1 << (N-1);
     uint32_t sign = x & signMask;
