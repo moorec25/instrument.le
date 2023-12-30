@@ -148,7 +148,7 @@ void FFT::writeOutput(FILE *fp) {
 
     for (int i=0; i<nFFT; i++) {
         ram.memRead(i, real, imag);
-        fprintf(fp, "%f %f\n", real/32768.0, imag/32768.0);
+        fprintf(fp, "%d %d\n", real, imag);
     }
 
 }

@@ -12,10 +12,10 @@ OBJ = $(patsubst %,$(BUILDDIR)/%,$(_OBJ))
 build: $(BUILDDIR)/fft
 
 $(BUILDDIR)/%.o: %.cpp $(DEPS) | builddir
-	$(CC) -c -o $@ $< 
+	$(CC) $(CFLAGS) -c -o  $@ $< 
 
 $(BUILDDIR)/fft: $(OBJ)
-	$(CC) -o $@ $^
+	$(CC) $(CFLAGS) -o  $@ $^
 
 run: $(RUNDIR)/.cfftdone
 
