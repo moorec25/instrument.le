@@ -9,33 +9,23 @@ import uvm_pkg::*;
 module fft_tb;
 
     parameter FFT_SIZE=4096;
-    parameter DATA_WIDTH=64;
-    parameter TWIDDLE_WIDTH=32;
+    parameter SAMPLE_WIDTH=16;
+    parameter TWIDDLE_WIDTH=50;
     /*AUTOWIRE*/
     // Beginning of automatic wires (for undeclared instantiated-module outputs)
     wire		fft_busy;		// From fft_dut of fft_wrapper.v
-    wire [DATA_WIDTH-1:0] m_axis_tdata;		// From fft_dut of fft_wrapper.v
-    wire [`BYTE_COUNT-1:0] m_axis_tkeep;	// From fft_dut of fft_wrapper.v
-    wire		m_axis_tlast;		// From fft_dut of fft_wrapper.v
-    wire		m_axis_tvalid;		// From fft_dut of fft_wrapper.v
-    wire		s_axis_tready;		// From fft_dut of fft_wrapper.v
     // End of automatics
     /*AUTOREGINPUT*/
     // Beginning of automatic reg inputs (for undeclared instantiated-module inputs)
     reg			clk;			// To fft_dut of fft_wrapper.v
+    reg			resetn;			// To fft_dut of fft_wrapper.v
     reg			fft_go;			// To fft_dut of fft_wrapper.v
     logic [`ADDR_WIDTH-1:0] fft_waddra;		// To mem_mux_if of mem_mux_if_t.v
     logic [`ADDR_WIDTH-1:0] fft_waddrb;		// To mem_mux_if of mem_mux_if_t.v
-    logic [DATA_WIDTH-1:0] fft_wdataa;		// To mem_mux_if of mem_mux_if_t.v
-    logic [DATA_WIDTH-1:0] fft_wdatab;		// To mem_mux_if of mem_mux_if_t.v
+    logic [SAMPLE_WIDTH-1:0] fft_wdataa;		// To mem_mux_if of mem_mux_if_t.v
+    logic [SAMPLE_WIDTH-1:0] fft_wdatab;		// To mem_mux_if of mem_mux_if_t.v
     logic			fft_wea;		// To mem_mux_if of mem_mux_if_t.v
     logic			fft_web;		// To mem_mux_if of mem_mux_if_t.v
-    wire        m_axis_tready;
-    reg			resetn;			// To fft_dut of fft_wrapper.v
-    reg [DATA_WIDTH-1:0] s_axis_tdata;		// To fft_dut of fft_wrapper.v
-    reg [`BYTE_COUNT-1:0] s_axis_tkeep;		// To fft_dut of fft_wrapper.v
-    reg			s_axis_tlast;		// To fft_dut of fft_wrapper.v
-    reg			s_axis_tvalid;		// To fft_dut of fft_wrapper.v
     logic			wmem_id;		// To mem_mux_if of mem_mux_if_t.v
     // End of automatics
 
@@ -61,7 +51,7 @@ module fft_tb;
     fft_wrapper #(/*AUTOINSTPARAM*/
 		  // Parameters
 		  .FFT_SIZE		(FFT_SIZE),
-		  .DATA_WIDTH		(DATA_WIDTH),
+		  .SAMPLE_WIDTH		(SAMPLE_WIDTH),
 		  .TWIDDLE_WIDTH	(TWIDDLE_WIDTH)) fft
     (/*AUTOINST*/
      // Outputs
@@ -84,14 +74,14 @@ module fft_tb;
      bind fft mem_mux_if_t #(/*AUTOINSTPARAM*/
 				 // Parameters
 				 .FFT_SIZE		(FFT_SIZE),
-				 .DATA_WIDTH		(DATA_WIDTH)) 
+				 .SAMPLE_WIDTH		(SAMPLE_WIDTH)) 
      mem_mux_if (/*AUTOINST*/
 		 // Inputs
          .clk (clk),
 		 .fft_waddra		(fft_waddra[`ADDR_WIDTH-1:0]),
 		 .fft_waddrb		(fft_waddrb[`ADDR_WIDTH-1:0]),
-		 .fft_wdataa		(fft_wdataa[DATA_WIDTH-1:0]),
-		 .fft_wdatab		(fft_wdatab[DATA_WIDTH-1:0]),
+		 .fft_wdataa		(fft_wdataa[`DATA_WIDTH-1:0]),
+		 .fft_wdatab		(fft_wdatab[`DATA_WIDTH-1:0]),
 		 .fft_wea		(fft_wea),
 		 .fft_web		(fft_web),
 		 .wmem_id		(wmem_id));

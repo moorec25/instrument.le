@@ -36,8 +36,10 @@ module twiddle_multiplier(/*AUTOARG*/
     reg signed [15:0] twiddle_real_q1;
 
     reg signed [DATA_WIDTH/2:0] pre_add0_q;
-    reg signed [16:0] twiddle_sum_q;
-    reg signed [16:0] twiddle_diff_q;
+    reg signed [16:0] twiddle_sum_q0;
+    reg signed [16:0] twiddle_diff_q0;
+    reg signed [16:0] twiddle_sum_q1;
+    reg signed [16:0] twiddle_diff_q1;
 
     reg signed [47:0] mult0_q;
     reg signed [47:0] mult1_q;
@@ -57,18 +59,21 @@ module twiddle_multiplier(/*AUTOARG*/
 
         twiddle_real_q0 <= twiddle_real;
         twiddle_real_q1 <= twiddle_real_q0;
+
+        twiddle_diff_q0 <= twiddle_diff;
+        twiddle_sum_q0 <= twiddle_sum;
+        twiddle_diff_q1 <= twiddle_diff_q0;
+        twiddle_sum_q1 <= twiddle_sum_q0;
     end
 
     always @ (posedge clk) begin
         pre_add0_q <= in_real_q0 + in_imag_q0;
-        twiddle_diff_q <= twiddle_diff;
-        twiddle_sum_q <= twiddle_sum;
     end
 
     always @ (posedge clk) begin
         mult0_q <= twiddle_real_q1 * pre_add0_q;
-        mult1_q <= in_real_q1 * twiddle_diff_q;
-        mult2_q <= in_imag_q1 * twiddle_sum_q;
+        mult1_q <= in_real_q1 * twiddle_diff_q1;
+        mult2_q <= in_imag_q1 * twiddle_sum_q1;
     end
 
     always @ (posedge clk) begin

@@ -1,6 +1,7 @@
 class mem_mux_monitor_t extends uvm_monitor;
 
-    parameter DATA_WIDTH = 64;
+    parameter SAMPLE_WIDTH = 16;
+    parameter FFT_SIZE = 4096;
 
     `uvm_component_utils(mem_mux_monitor_t);
 
@@ -32,10 +33,10 @@ class mem_mux_monitor_t extends uvm_monitor;
                 `uvm_info("mem_mux_monitor", "Memory Write Enabled", UVM_LOW)
                 mem_mux_trans.waddra = vif.fft_waddra;
                 mem_mux_trans.waddrb = vif.fft_waddrb;
-                mem_mux_trans.wdataa_r = $signed(vif.fft_wdataa[DATA_WIDTH-1:DATA_WIDTH/2]);
-                mem_mux_trans.wdataa_i = $signed(vif.fft_wdataa[DATA_WIDTH/2-1:0]);
-                mem_mux_trans.wdatab_r = $signed(vif.fft_wdatab[DATA_WIDTH-1:DATA_WIDTH/2]);
-                mem_mux_trans.wdatab_i = $signed(vif.fft_wdatab[DATA_WIDTH/2-1:0]);
+                mem_mux_trans.wdataa_r = $signed(vif.fft_wdataa[`DATA_WIDTH-1:`DATA_WIDTH/2]);
+                mem_mux_trans.wdataa_i = $signed(vif.fft_wdataa[`DATA_WIDTH/2-1:0]);
+                mem_mux_trans.wdatab_r = $signed(vif.fft_wdatab[`DATA_WIDTH-1:`DATA_WIDTH/2]);
+                mem_mux_trans.wdatab_i = $signed(vif.fft_wdatab[`DATA_WIDTH/2-1:0]);
                 mem_mux_trans.wmem_id = vif.wmem_id;
                 mon_analysis_port.write(mem_mux_trans);
             end

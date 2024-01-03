@@ -11,7 +11,7 @@ module memory_mux (/*AUTOARG*/
    );
 
     parameter FFT_SIZE = 4096;
-    parameter DATA_WIDTH = 44;
+    parameter SAMPLE_WIDTH = 16;
 
     input clk;
 
@@ -24,47 +24,47 @@ module memory_mux (/*AUTOARG*/
     input [`ADDR_WIDTH-1:0] fft_raddra;
     input [`ADDR_WIDTH-1:0] fft_raddrb;
 
-    output [DATA_WIDTH-1:0] fft_rdataa;
-    output [DATA_WIDTH-1:0] fft_rdatab;
+    output [`DATA_WIDTH-1:0] fft_rdataa;
+    output [`DATA_WIDTH-1:0] fft_rdatab;
 
     input [`ADDR_WIDTH-1:0] fft_waddra;
     input [`ADDR_WIDTH-1:0] fft_waddrb;
 
-    input [DATA_WIDTH-1:0] fft_wdataa;
-    input [DATA_WIDTH-1:0] fft_wdatab;
+    input [`DATA_WIDTH-1:0] fft_wdataa;
+    input [`DATA_WIDTH-1:0] fft_wdatab;
 
     input fft_wea;
     input fft_web;
 
     input axis_s2mem_we;
     input [`ADDR_WIDTH-1:0] axis_s2mem_waddr;
-    input [DATA_WIDTH-1:0] axis_s2mem_wdata;
+    input [`DATA_WIDTH-1:0] axis_s2mem_wdata;
 
     input axis_mem2m_clken;
     input [`ADDR_WIDTH-1:0] axis_mem2m_raddr;
-    output [DATA_WIDTH-1:0] axis_mem2m_rdata;
+    output [`DATA_WIDTH-1:0] axis_mem2m_rdata;
 
     reg [`ADDR_WIDTH-1:0] mem0_addra;
-    reg [DATA_WIDTH-1:0] mem0_dina;
+    reg [`DATA_WIDTH-1:0] mem0_dina;
     reg mem0_wea;
     reg mem0_ena;
-    wire [DATA_WIDTH-1:0] mem0_douta;
+    wire [`DATA_WIDTH-1:0] mem0_douta;
 
     reg [`ADDR_WIDTH-1:0] mem0_addrb;
-    reg [DATA_WIDTH-1:0] mem0_dinb;
+    reg [`DATA_WIDTH-1:0] mem0_dinb;
     reg mem0_web;
-    wire [DATA_WIDTH-1:0] mem0_doutb;
+    wire [`DATA_WIDTH-1:0] mem0_doutb;
 
     reg [`ADDR_WIDTH-1:0] mem1_addra;
-    reg [DATA_WIDTH-1:0] mem1_dina;
+    reg [`DATA_WIDTH-1:0] mem1_dina;
     reg mem1_wea;
     reg mem1_ena;
-    wire [DATA_WIDTH-1:0] mem1_douta;
+    wire [`DATA_WIDTH-1:0] mem1_douta;
 
     reg [`ADDR_WIDTH-1:0] mem1_addrb;
-    reg [DATA_WIDTH-1:0]mem1_dinb;
+    reg [`DATA_WIDTH-1:0]mem1_dinb;
     reg mem1_web;
-    wire [DATA_WIDTH-1:0] mem1_doutb;
+    wire [`DATA_WIDTH-1:0] mem1_doutb;
 
     assign axis_mem2m_rdata = mem0_douta;
     assign fft_rdataa = (rmem_id == 0) ? mem0_douta : mem1_douta;
@@ -72,11 +72,11 @@ module memory_mux (/*AUTOARG*/
 
     always @* begin
         mem0_addra = fft_raddra;
-        mem0_dina = {DATA_WIDTH{1'b0}};
+        mem0_dina = {`DATA_WIDTH{1'b0}};
         mem0_wea = 1'b0;
         mem0_ena = 1'b1;
         mem0_addrb = fft_raddrb;
-        mem0_dinb = {DATA_WIDTH{1'b0}};
+        mem0_dinb = {`DATA_WIDTH{1'b0}};
         mem0_web = 1'b0;
         if (axis_rx) begin
             mem0_addra = axis_s2mem_waddr;
@@ -86,7 +86,7 @@ module memory_mux (/*AUTOARG*/
         end
         else if (axis_tx) begin
             mem0_addra = axis_mem2m_raddr;
-            mem0_dina = {DATA_WIDTH{1'b0}};
+            mem0_dina = {`DATA_WIDTH{1'b0}};
             mem0_wea = 1'b0;
             mem0_ena = axis_mem2m_clken;
         end
@@ -113,16 +113,16 @@ module memory_mux (/*AUTOARG*/
         end
         else begin
             mem1_addra = fft_raddra;
-            mem1_dina = {DATA_WIDTH{1'b0}};
+            mem1_dina = {`DATA_WIDTH{1'b0}};
             mem1_wea = 1'b0;
             mem1_ena = 1'b1;
             mem1_addrb = fft_raddrb;
-            mem1_dinb = {DATA_WIDTH{1'b0}};
+            mem1_dinb = {`DATA_WIDTH{1'b0}};
             mem1_web = 1'b0;
         end
     end
 
-    ram2p64x4096 mem0 (
+    ram2p44x4096 mem0 (
         .clka(clk),
         .addra(mem0_addra),
         .dina(mem0_dina),
@@ -136,7 +136,7 @@ module memory_mux (/*AUTOARG*/
         .web(mem0_web)
     );
 
-    ram2p64x4096 mem1 (
+    ram2p44x4096 mem1 (
         .clka(clk),
         .addra(mem1_addra),
         .dina(mem1_dina),

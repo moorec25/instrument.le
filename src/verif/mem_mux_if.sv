@@ -7,13 +7,13 @@ interface mem_mux_if_t(/*AUTOARG*/
    );
 
     parameter FFT_SIZE = 4096;
-    parameter DATA_WIDTH = 64;
+    parameter SAMPLE_WIDTH = 16;
 
     input clk;
     input [`ADDR_WIDTH-1:0] fft_waddra;
     input [`ADDR_WIDTH-1:0] fft_waddrb;
-    input [DATA_WIDTH-1:0] fft_wdataa;
-    input [DATA_WIDTH-1:0] fft_wdatab;
+    input [`DATA_WIDTH-1:0] fft_wdataa;
+    input [`DATA_WIDTH-1:0] fft_wdatab;
     input fft_wea;
     input fft_web;
     input wmem_id;

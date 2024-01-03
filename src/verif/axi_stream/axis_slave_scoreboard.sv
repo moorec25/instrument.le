@@ -40,9 +40,9 @@ class axis_slave_scoreboard_t extends uvm_scoreboard;
             if (actual.compare(expected)) begin
                 `uvm_info("axis_slave_scoreboard", "AXI stream data match", UVM_LOW)
             end else begin
-                actual.print();
                 expected.print();
-                `uvm_error("axis_slave_scoreboard", "AXI stream mismatch")
+                actual.print();
+                `uvm_fatal("axis_slave_scoreboard", "AXI stream mismatch")
             end
         end
         phase.drop_objection(this);

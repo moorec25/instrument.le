@@ -10,7 +10,7 @@ module axis_bram_master(/*AUTOARG*/
    clk, reset, axis_bram_master_go, axis_mem2m_rdata, m_axis_tready
    );
 
-    parameter DATA_WIDTH = 64;
+    parameter SAMPLE_WIDTH = 16;
     parameter FFT_SIZE = 4096;
 
     input clk, reset;
@@ -24,14 +24,17 @@ module axis_bram_master(/*AUTOARG*/
     // BRAM raddr, clk enable, rdata;
     output reg [`ADDR_WIDTH-1:0] axis_mem2m_raddr;
     output axis_mem2m_clken;
-    input [DATA_WIDTH-1:0] axis_mem2m_rdata;
+    input [`DATA_WIDTH-1:0] axis_mem2m_rdata;
 
     // AXI stream signals
     output m_axis_tvalid;
     output m_axis_tlast;
-    output [DATA_WIDTH-1:0] m_axis_tdata;
+    output [`AXI_WIDTH-1:0] m_axis_tdata;
     output [`BYTE_COUNT-1:0] m_axis_tkeep;
     input m_axis_tready;
+
+    wire [`AXI_WIDTH/2-1:0] data_r;
+    wire [`AXI_WIDTH/2-1:0] data_i;
 
     // States
     localparam IDLE = 6'b000001,
@@ -50,7 +53,11 @@ module axis_bram_master(/*AUTOARG*/
     assign axis_bram_master_busy = axis_master_state_q != IDLE;
 
     assign m_axis_tkeep = {`BYTE_COUNT{1'b1}}; // Will always be using all bytes so tie tkeep high
-    assign m_axis_tdata = axis_mem2m_rdata; // Wire memory read data to stream data port
+
+    // Sign extend data and pack into 64 bits
+    assign data_r = { {(`AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH-1]}}, axis_mem2m_rdata[`DATA_WIDTH-1:`DATA_WIDTH/2] };
+    assign data_i = { {(`AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH/2-1]}}, axis_mem2m_rdata[`DATA_WIDTH/2-1:0] };
+    assign m_axis_tdata = {data_r, data_i}; // Wire memory read data to stream data port
 
     // Write data is valid in these 3 states
     assign m_axis_tvalid = (axis_master_state_q == READ_SEND) | (axis_master_state_q == SEND0) | (axis_master_state_q == SEND1);

@@ -9,8 +9,8 @@ module axis_bram_slave(/*AUTOARG*/
    s_axis_tdata, s_axis_tkeep
    );
 
-    parameter DATA_WIDTH = 64;
     parameter FFT_SIZE = 4096;
+    parameter SAMPLE_WIDTH = 16;
     
     input clk, reset;
 
@@ -22,14 +22,14 @@ module axis_bram_slave(/*AUTOARG*/
 
     // BRAM write address and data
     output [`ADDR_WIDTH-1:0] axis_s2mem_waddr; 
-    output [DATA_WIDTH-1:0] axis_s2mem_wdata;
+    output [`DATA_WIDTH-1:0] axis_s2mem_wdata;
     output axis_s2mem_we;
 
     // AXI stream signals
 
     input s_axis_tvalid;
     input s_axis_tlast;
-    input [DATA_WIDTH-1:0] s_axis_tdata;
+    input [`AXI_WIDTH-1:0] s_axis_tdata;
     input [`BYTE_COUNT-1:0] s_axis_tkeep;
     output s_axis_tready;
     
@@ -38,7 +38,7 @@ module axis_bram_slave(/*AUTOARG*/
     assign s_axis_tready = axis_bram_s_state_q == WRITE;
 
     assign axis_s2mem_we = s_axis_tready & s_axis_tvalid;
-    assign axis_s2mem_wdata = s_axis_tdata;
+    assign axis_s2mem_wdata = {s_axis_tdata[`AXI_WIDTH/2+`DATA_WIDTH/2-1:`AXI_WIDTH/2], s_axis_tdata[`DATA_WIDTH/2-1:0]};
 
     reg [`ADDR_WIDTH-1:0] counter_q = {`ADDR_WIDTH{1'b0}};
 
