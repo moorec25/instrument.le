@@ -1,9 +1,10 @@
 `timescale 1ns / 1ps
 
+import fft_pkg::*;
 import uvm_pkg::*;
-`include "uvm_macros.svh"
-`include "../../sources_1/new/fft_defs.vh"
-`include "fft_test.sv"
+`include "mem_mux_if.sv"
+`include "axis_master_if.sv"
+`include "axis_slave_if.sv"
 
 module fft_tb;
 
@@ -29,8 +30,8 @@ module fft_tb;
     logic [DATA_WIDTH-1:0] fft_wdatab;		// To mem_mux_if of mem_mux_if_t.v
     logic			fft_wea;		// To mem_mux_if of mem_mux_if_t.v
     logic			fft_web;		// To mem_mux_if of mem_mux_if_t.v
-    reg			m_axis_tready;		// To fft_dut of fft_wrapper.v
-    reg			reset;			// To fft_dut of fft_wrapper.v
+    wire        m_axis_tready;
+    reg			resetn;			// To fft_dut of fft_wrapper.v
     reg [DATA_WIDTH-1:0] s_axis_tdata;		// To fft_dut of fft_wrapper.v
     reg [`BYTE_COUNT-1:0] s_axis_tkeep;		// To fft_dut of fft_wrapper.v
     reg			s_axis_tlast;		// To fft_dut of fft_wrapper.v
@@ -44,17 +45,18 @@ module fft_tb;
     end
 
     initial begin
-        reset = 0;
+        resetn = 0;
         fft_go = 0;
-        #8
-        reset = 1;
         #40
-        reset = 0;
+        resetn = 1;
         #12
         fft_go = 1;
         #8
         fft_go = 0;
     end
+
+    axis_master_if_t axis_master_if (clk, resetn);
+    axis_slave_if_t axis_slave_if (clk, resetn);
 
     fft_wrapper #(/*AUTOINSTPARAM*/
 		  // Parameters
@@ -64,20 +66,20 @@ module fft_tb;
     (/*AUTOINST*/
      // Outputs
      .fft_busy				(fft_busy),
-     .m_axis_tdata			(m_axis_tdata[DATA_WIDTH-1:0]),
-     .m_axis_tkeep			(m_axis_tkeep[`BYTE_COUNT-1:0]),
-     .m_axis_tlast			(m_axis_tlast),
-     .m_axis_tvalid			(m_axis_tvalid),
-     .s_axis_tready			(s_axis_tready),
+     .m_axis_tdata			(axis_slave_if.tdata),
+     .m_axis_tkeep			(axis_slave_if.tkeep),
+     .m_axis_tlast			(axis_slave_if.tlast),
+     .m_axis_tvalid			(axis_slave_if.tvalid),
+     .s_axis_tready			(axis_master_if.tready),
      // Inputs
      .clk				(clk),
      .fft_go				(fft_go),
-     .m_axis_tready			(m_axis_tready),
-     .reset				(reset),
-     .s_axis_tdata			(s_axis_tdata[DATA_WIDTH-1:0]),
-     .s_axis_tkeep			(s_axis_tkeep[`BYTE_COUNT-1:0]),
-     .s_axis_tlast			(s_axis_tlast),
-     .s_axis_tvalid			(s_axis_tvalid));
+     .m_axis_tready			(axis_slave_if.tready),
+     .resetn				(resetn),
+     .s_axis_tdata			(axis_master_if.tdata),
+     .s_axis_tkeep			(axis_master_if.tkeep),
+     .s_axis_tlast			(axis_master_if.tlast),
+     .s_axis_tvalid			(axis_master_if.tvalid));
     
      bind fft mem_mux_if_t #(/*AUTOINSTPARAM*/
 				 // Parameters
@@ -85,6 +87,7 @@ module fft_tb;
 				 .DATA_WIDTH		(DATA_WIDTH)) 
      mem_mux_if (/*AUTOINST*/
 		 // Inputs
+         .clk (clk),
 		 .fft_waddra		(fft_waddra[`ADDR_WIDTH-1:0]),
 		 .fft_waddrb		(fft_waddrb[`ADDR_WIDTH-1:0]),
 		 .fft_wdataa		(fft_wdataa[DATA_WIDTH-1:0]),
@@ -93,8 +96,11 @@ module fft_tb;
 		 .fft_web		(fft_web),
 		 .wmem_id		(wmem_id));
 
+
     initial begin
         uvm_config_db#(virtual mem_mux_if_t)::set(null, "", "mem_mux_vif", fft.mem_mux_if);
+        uvm_config_db#(virtual axis_master_if_t)::set(null, "", "axis_master_vif", axis_master_if);
+        uvm_config_db#(virtual axis_slave_if_t)::set(null, "", "axis_slave_vif", axis_slave_if);
         run_test("fft_test");
     end
 
