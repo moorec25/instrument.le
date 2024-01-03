@@ -51,7 +51,7 @@ module fft_top_ctrl(/*AUTOARG*/
         FLUSH_PIPE = 3,
         AXIS_SEND = 4;
 
-    reg [1:0] fft_top_state_q;
+    reg [2:0] fft_top_state_q;
 
     always @ (posedge clk) begin
 
@@ -61,7 +61,7 @@ module fft_top_ctrl(/*AUTOARG*/
             case (fft_top_state_q)
                 
                 IDLE: begin
-                    fft_top_state_q <= fft_go ? COMPUTE : IDLE;
+                    fft_top_state_q <= fft_go ? AXIS_READ : IDLE;
                 end
 
                 AXIS_READ: begin
@@ -79,7 +79,7 @@ module fft_top_ctrl(/*AUTOARG*/
                 end
 
                 AXIS_SEND: begin
-                    fft_top_state_q <= axis_bram_slave_busy ? AXIS_SEND : IDLE;
+                    fft_top_state_q <= axis_bram_master_busy ? AXIS_SEND : IDLE;
                 end
                 
             endcase
@@ -110,8 +110,7 @@ module fft_top_ctrl(/*AUTOARG*/
 
             IDLE: begin
                 if (fft_go) begin
-                    //axis_bram_slave_go = 1'b1;
-                    addr_gen_go = 1'b1; 
+                    axis_bram_slave_go = 1'b1;
                 end
             end
 
@@ -127,7 +126,7 @@ module fft_top_ctrl(/*AUTOARG*/
             FLUSH_PIPE: begin
                 if (~fft_data_valid) begin
                     addr_gen_go = (fft_level == `LEVELS-1) ? 1'b0 : 1'b1;
-                    axis_bram_master_go = 1'b1;
+                    axis_bram_master_go = (fft_level == `LEVELS-1) ? 1'b1 : 1'b0;
                 end
             end
 

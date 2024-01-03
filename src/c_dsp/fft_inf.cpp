@@ -1,4 +1,5 @@
 #include "fft.h"
+#include "fft_common.h"
 
 int main (int argc, char *argv[]) {
     
@@ -27,6 +28,12 @@ int main (int argc, char *argv[]) {
 
     FFT fft = FFT(fftSize);
 
+#ifdef FFT_TRACE_EN
+    char mem_wr_trace_name[] = "/fft_mem_wr_trace.txt";
+    char *mem_wr_trace_path = (char *) malloc(strlen(test_path) + strlen(mem_wr_trace_name) + 1);
+    sprintf(mem_wr_trace_path, "%s%s", test_path, mem_wr_trace_name);
+    fft.fp_mem_wr_trace = fopen(mem_wr_trace_path, "w");
+#endif
     fft.loadRam(input_file);
 
     // Perform FFT

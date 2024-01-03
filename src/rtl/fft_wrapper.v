@@ -5,20 +5,20 @@ module fft_wrapper(/*AUTOARG*/
    s_axis_tready, m_axis_tvalid, m_axis_tlast, m_axis_tkeep,
    m_axis_tdata, fft_busy,
    // Inputs
-   s_axis_tvalid, s_axis_tlast, s_axis_tkeep, s_axis_tdata, reset,
-   m_axis_tready, fft_go, clk
+   s_axis_tvalid, s_axis_tlast, s_axis_tkeep, s_axis_tdata,
+   m_axis_tready, fft_go, clk, resetn
    );
 
     parameter FFT_SIZE = 4096;
     parameter DATA_WIDTH = 64;
-    parameter TWIDDLE_WIDTH = 32;
+    parameter TWIDDLE_WIDTH = 50;
 
+    input resetn;
     /*AUTOINPUT*/
     // Beginning of automatic inputs (from unused autoinst inputs)
     input		clk;			// To top_ctrl of fft_top_ctrl.v, ...
     input		fft_go;			// To top_ctrl of fft_top_ctrl.v
     input		m_axis_tready;		// To axis_master of axis_bram_master.v
-    input		reset;			// To top_ctrl of fft_top_ctrl.v, ...
     input [DATA_WIDTH-1:0] s_axis_tdata;	// To axis_slave of axis_bram_slave.v
     input [`BYTE_COUNT-1:0] s_axis_tkeep;	// To axis_slave of axis_bram_slave.v
     input		s_axis_tlast;		// To axis_slave of axis_bram_slave.v
@@ -68,6 +68,8 @@ module fft_wrapper(/*AUTOARG*/
     wire		wmem_id;		// From top_ctrl of fft_top_ctrl.v
     // End of automatics
     
+    wire reset;
+    assign reset = ~resetn;
     fft_top_ctrl #(/*AUTOINSTPARAM*/
 		   // Parameters
 		   .FFT_SIZE		(FFT_SIZE)) top_ctrl
@@ -103,7 +105,8 @@ module fft_wrapper(/*AUTOARG*/
      .clk				(clk),
      .fft_rdataa			(fft_rdataa[DATA_WIDTH-1:0]),
      .fft_rdatab			(fft_rdatab[DATA_WIDTH-1:0]),
-     .twiddle				(twiddle[TWIDDLE_WIDTH-1:0]));
+     .twiddle				(twiddle[TWIDDLE_WIDTH-1:0]),
+     .scale                 (fft_level[0]));
 
     address_gen #(/*AUTOINSTPARAM*/
 		  // Parameters

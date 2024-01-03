@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     mixture_int = (mixture * 32766).astype(np.int16)
 
-    mixture_fft = np.fft.fft(mixture, samples)
+    mixture_fft = np.fft.fft(mixture, samples, norm="ortho")
 
     dump_input_samples(args.testname, mixture_int)
     dump_output(args.testname, mixture_fft.real, mixture_fft.imag)

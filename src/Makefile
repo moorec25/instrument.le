@@ -22,3 +22,6 @@ py_fft:
 
 clean:
 	rm -rf $(OUT_HOME)
+
+clean_demo:
+	$(MAKE) clean -C demo

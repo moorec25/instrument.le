@@ -11,7 +11,7 @@ module memory_mux (/*AUTOARG*/
    );
 
     parameter FFT_SIZE = 4096;
-    parameter DATA_WIDTH = 64;
+    parameter DATA_WIDTH = 44;
 
     input clk;
 
@@ -97,7 +97,7 @@ module memory_mux (/*AUTOARG*/
             mem0_ena = 1'b1;
             mem0_addrb = fft_waddrb;
             mem0_dinb = fft_wdatab;
-            mem0_wea = fft_wea;
+            mem0_web = fft_web;
         end
     end
 
@@ -124,13 +124,13 @@ module memory_mux (/*AUTOARG*/
 
     ram2p64x4096 mem0 (
         .clka(clk),
-        .addra({8'b0, mem0_addra}),
+        .addra(mem0_addra),
         .dina(mem0_dina),
         .douta(mem0_douta),
         .wea(mem0_wea),
         .ena(mem0_ena),
         .clkb(clk),
-        .addrb({8'b0, mem0_addrb}),
+        .addrb(mem0_addrb),
         .dinb(mem0_dinb),
         .doutb(mem0_doutb),
         .web(mem0_web)
@@ -138,13 +138,13 @@ module memory_mux (/*AUTOARG*/
 
     ram2p64x4096 mem1 (
         .clka(clk),
-        .addra({8'b0 ,mem1_addra}),
+        .addra(mem1_addra),
         .dina(mem1_dina),
         .douta(mem1_douta),
         .wea(mem1_wea),
         .ena(mem1_ena),
         .clkb(clk),
-        .addrb({8'b0 , mem1_addrb}),
+        .addrb(mem1_addrb),
         .dinb(mem1_dinb),
         .doutb(mem1_doutb),
         .web(mem1_web)

@@ -13,4 +13,4 @@ rundir:
 	mkdir -p $(RUNDIR)
 
 clean:
-	rm -rf $(OUT_HOME)/pydsp
+	rm $(RUNDIR)/.pyfftdone

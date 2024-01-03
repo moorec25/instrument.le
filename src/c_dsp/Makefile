@@ -7,7 +7,7 @@ _OBJ = twiddle_rom.o fft.o dualport.o fft_inf.o
 OBJ = $(patsubst %,$(BUILDDIR)/%,$(_OBJ))
 
 .PHONY: clean run builddir
-.SILENT: run builddir
+.SILENT: run builddir rundir
 
 build: $(BUILDDIR)/fft
 

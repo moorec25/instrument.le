@@ -8,15 +8,15 @@ module twiddle_rom(/*AUTOARG*/
    );
 
     parameter FFT_SIZE = 4096;
-    parameter TWIDDLE_WIDTH = 32;
+    parameter TWIDDLE_WIDTH = 50;
 
     input clk;
     input [$clog2(`NUM_TWIDDLES)-1:0] twiddle_addr;
     output [TWIDDLE_WIDTH-1:0] twiddle;
 
-    rom1p32x4096 rom
+    rom1p50x2048 rom
     (
-        .addra({9'b0, twiddle_addr}),
+        .addra(twiddle_addr),
         .clka(clk),
         .douta(twiddle)
     );

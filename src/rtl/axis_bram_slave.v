@@ -33,6 +33,7 @@ module axis_bram_slave(/*AUTOARG*/
     input [`BYTE_COUNT-1:0] s_axis_tkeep;
     output s_axis_tready;
     
+    assign axis_bram_slave_busy = axis_bram_s_state_q != IDLE;
     // Will always be ready to accept data
     assign s_axis_tready = axis_bram_s_state_q == WRITE;
 
@@ -69,6 +70,9 @@ module axis_bram_slave(/*AUTOARG*/
 
                 WRITE: begin
                     counter_q <=  s_axis_tvalid ? counter_q + 1'b1 : counter_q;
+                    if ((counter_q == FFT_SIZE-1) && s_axis_tvalid) begin
+                        axis_bram_s_state_q <= IDLE;
+                    end
                 end
             endcase
         end

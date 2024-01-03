@@ -4,11 +4,11 @@ module butterfly(/*AUTOARG*/
    // Outputs
    fft_wdataa, fft_wdatab,
    // Inputs
-   clk, fft_rdataa, fft_rdatab, twiddle
+   clk, fft_rdataa, fft_rdatab, twiddle, scale
    );
 
     parameter DATA_WIDTH = 64;
-    parameter TWIDDLE_WIDTH = 32;
+    parameter TWIDDLE_WIDTH = 50;
     localparam DELAY_PIPE = 4;
 
     input clk;
@@ -22,6 +22,8 @@ module butterfly(/*AUTOARG*/
     output [DATA_WIDTH:0] fft_wdataa;
     output [DATA_WIDTH:0] fft_wdatab;
 
+    input scale;
+
     reg [DATA_WIDTH-1:0] in1_q [DELAY_PIPE-1:0];
 
     wire signed [DATA_WIDTH/2-1:0] in1_real_delayed;
@@ -34,10 +36,11 @@ module butterfly(/*AUTOARG*/
 
     assign {in2_real, in2_imag} = fft_rdatab;
 
-    wire [TWIDDLE_WIDTH/2-1:0] twiddle_real;
-    wire [TWIDDLE_WIDTH/2-1:0] twiddle_imag;
+    wire [15:0] twiddle_real;
+    wire [16:0] twiddle_sum;
+    wire [16:0] twiddle_diff;
 
-    assign {twiddle_real, twiddle_imag} = twiddle;
+    assign {twiddle_real, twiddle_sum, twiddle_diff} = twiddle;
 
     wire signed [DATA_WIDTH/2-1:0] twiddle_mult_real;
     wire signed [DATA_WIDTH/2-1:0] twiddle_mult_imag; 
@@ -48,8 +51,18 @@ module butterfly(/*AUTOARG*/
     reg signed [DATA_WIDTH/2-1:0] out2_real;
     reg signed [DATA_WIDTH/2-1:0] out2_imag;
 
-    assign fft_wdataa = {out1_real, out1_imag};
-    assign fft_wdatab = {out2_real, out2_imag};
+    wire [DATA_WIDTH/2-1:0] out1_real_scaled;
+    wire [DATA_WIDTH/2-1:0] out1_imag_scaled;
+    wire [DATA_WIDTH/2-1:0] out2_real_scaled;
+    wire [DATA_WIDTH/2-1:0] out2_imag_scaled;
+
+    assign out1_real_scaled = scale ? {out1_real[DATA_WIDTH/2-1], out1_real[DATA_WIDTH/2-1:1]} : out1_real;
+    assign out1_imag_scaled = scale ? {out1_imag[DATA_WIDTH/2-1], out1_imag[DATA_WIDTH/2-1:1]} : out1_imag;
+    assign out2_real_scaled = scale ? {out2_real[DATA_WIDTH/2-1], out2_real[DATA_WIDTH/2-1:1]} : out2_real;
+    assign out2_imag_scaled = scale ? {out2_imag[DATA_WIDTH/2-1], out2_imag[DATA_WIDTH/2-1:1]} : out2_imag;
+
+    assign fft_wdataa = {out1_real_scaled, out1_imag_scaled};
+    assign fft_wdatab = {out2_real_scaled, out2_imag_scaled};
 
     integer i;
     always @ (posedge clk) begin
