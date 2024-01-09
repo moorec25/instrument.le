@@ -20,7 +20,7 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
         mem_mux_trans_imp = new("mem_mux_trans_imp", this);
         expected = mem_mux_seq_item_t::type_id::create("expected", this);
 
-        mem_trace = $fopen("/home/carter/Documents/instrument.le/out/angels/fft_mem_wr_trace.txt", "r");
+        mem_trace = $fopen("/home/carter/Documents/instrument.le/out/random/fft_mem_wr_trace.txt", "r");
 
     endfunction : build_phase
 
@@ -30,7 +30,6 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
     endfunction : write
         
     virtual task run_phase(uvm_phase phase);
-        phase.raise_objection(this);
         while ($fscanf(mem_trace, "%x %x %x %x %x %x %d", expected.waddra, expected.wdataa_r, expected.wdataa_i, expected.waddrb, expected.wdatab_r, expected.wdatab_i, expected.wmem_id) == 7) begin
             wait(trans_q.size > 0);
             actual = trans_q.pop_front();
@@ -43,6 +42,5 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
                 `uvm_fatal("mem_mux_scoreboard", "MEMORY WRITE MISMATCH OCURRED")
             end
         end
-        phase.drop_objection(this);
     endtask : run_phase
 endclass

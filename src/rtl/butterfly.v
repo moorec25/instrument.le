@@ -57,6 +57,8 @@ module butterfly(/*AUTOARG*/
     wire [`DATA_WIDTH/2-1:0] out2_real_scaled;
     wire [`DATA_WIDTH/2-1:0] out2_imag_scaled;
 
+    // Output fft scaled by 1/sqrt(n)
+    // Right shift every other fft stage
     assign out1_real_scaled = scale ? {out1_real[`DATA_WIDTH/2-1], out1_real[`DATA_WIDTH/2-1:1]} : out1_real;
     assign out1_imag_scaled = scale ? {out1_imag[`DATA_WIDTH/2-1], out1_imag[`DATA_WIDTH/2-1:1]} : out1_imag;
     assign out2_real_scaled = scale ? {out2_real[`DATA_WIDTH/2-1], out2_real[`DATA_WIDTH/2-1:1]} : out2_real;

@@ -46,10 +46,11 @@ module fft_top_ctrl(/*AUTOARG*/
     assign axis_tx = (fft_top_state_q == AXIS_SEND);
 
     localparam IDLE = 0,
-        AXIS_READ = 1,
-        COMPUTE = 2,
-        FLUSH_PIPE = 3,
-        AXIS_SEND = 4;
+        CLEAR = 1,
+        AXIS_READ = 2,
+        COMPUTE = 3,
+        FLUSH_PIPE = 4,
+        AXIS_SEND = 5;
 
     reg [2:0] fft_top_state_q;
 

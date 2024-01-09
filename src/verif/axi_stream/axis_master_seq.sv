@@ -11,7 +11,7 @@ class axis_master_seq_t extends uvm_sequence #(axis_trans_t);
     endfunction
 
     virtual task body();
-        stim_trace = $fopen("/home/carter/Documents/instrument.le/out/angels/fft_in.txt", "r");
+        stim_trace = $fopen("/home/carter/Documents/instrument.le/out/random/fft_in.txt", "r");
         while ($fscanf(stim_trace, "%d", sample) == 1) begin
            req = axis_trans_t::type_id::create("req");
            req.data_r = sample;

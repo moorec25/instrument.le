@@ -10,6 +10,8 @@ class fft_env_t extends uvm_env;
     axis_slave_scoreboard_t axis_slave_scoreboard;
     axis_slave_monitor_t axis_slave_monitor;
 
+    fft_ctrl_agent_t fft_ctrl_agent;
+
     function new(string name = "fft_env", uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -21,6 +23,7 @@ class fft_env_t extends uvm_env;
         axis_master_agent = axis_master_agent_t::type_id::create("axis_master_agent", this);
         axis_slave_scoreboard = axis_slave_scoreboard_t::type_id::create("axis_slave_scoreboard", this);
         axis_slave_monitor = axis_slave_monitor_t::type_id::create("axis_slave_monitor", this);
+        fft_ctrl_agent = fft_ctrl_agent_t::type_id::create("fft_ctrl_agent", this);
     endfunction : build_phase
 
     virtual function void connect_phase(uvm_phase phase);

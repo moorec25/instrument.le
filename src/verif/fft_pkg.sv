@@ -3,6 +3,7 @@ package fft_pkg;
     import uvm_pkg::*;
     import axis_master_pkg::*;
     import axis_slave_pkg::*;
+    import fft_ctrl_pkg::*;
 
     `include "../../sources_1/new/fft_defs.vh"
     `include "uvm_macros.svh"

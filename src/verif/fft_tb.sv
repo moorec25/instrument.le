@@ -5,6 +5,7 @@ import uvm_pkg::*;
 `include "mem_mux_if.sv"
 `include "axis_master_if.sv"
 `include "axis_slave_if.sv"
+`include "fft_ctrl_if.sv"
 
 module fft_tb;
 
@@ -18,8 +19,7 @@ module fft_tb;
     /*AUTOREGINPUT*/
     // Beginning of automatic reg inputs (for undeclared instantiated-module inputs)
     reg			clk;			// To fft_dut of fft_wrapper.v
-    reg			resetn;			// To fft_dut of fft_wrapper.v
-    reg			fft_go;			// To fft_dut of fft_wrapper.v
+    reg         resetn;
     logic [`ADDR_WIDTH-1:0] fft_waddra;		// To mem_mux_if of mem_mux_if_t.v
     logic [`ADDR_WIDTH-1:0] fft_waddrb;		// To mem_mux_if of mem_mux_if_t.v
     logic [SAMPLE_WIDTH-1:0] fft_wdataa;		// To mem_mux_if of mem_mux_if_t.v
@@ -36,17 +36,13 @@ module fft_tb;
 
     initial begin
         resetn = 0;
-        fft_go = 0;
         #40
         resetn = 1;
-        #12
-        fft_go = 1;
-        #8
-        fft_go = 0;
     end
 
     axis_master_if_t axis_master_if (clk, resetn);
     axis_slave_if_t axis_slave_if (clk, resetn);
+    fft_ctrl_if_t fft_ctrl_if (clk, resetn);
 
     fft_wrapper #(/*AUTOINSTPARAM*/
 		  // Parameters
@@ -55,7 +51,7 @@ module fft_tb;
 		  .TWIDDLE_WIDTH	(TWIDDLE_WIDTH)) fft
     (/*AUTOINST*/
      // Outputs
-     .fft_busy				(fft_busy),
+     .fft_busy				(fft_ctrl_if.fft_busy),
      .m_axis_tdata			(axis_slave_if.tdata),
      .m_axis_tkeep			(axis_slave_if.tkeep),
      .m_axis_tlast			(axis_slave_if.tlast),
@@ -63,7 +59,7 @@ module fft_tb;
      .s_axis_tready			(axis_master_if.tready),
      // Inputs
      .clk				(clk),
-     .fft_go				(fft_go),
+     .fft_go				(fft_ctrl_if.fft_go),
      .m_axis_tready			(axis_slave_if.tready),
      .resetn				(resetn),
      .s_axis_tdata			(axis_master_if.tdata),
@@ -91,6 +87,7 @@ module fft_tb;
         uvm_config_db#(virtual mem_mux_if_t)::set(null, "", "mem_mux_vif", fft.mem_mux_if);
         uvm_config_db#(virtual axis_master_if_t)::set(null, "", "axis_master_vif", axis_master_if);
         uvm_config_db#(virtual axis_slave_if_t)::set(null, "", "axis_slave_vif", axis_slave_if);
+        uvm_config_db#(virtual fft_ctrl_if_t)::set(null, "", "fft_ctrl_vif", fft_ctrl_if);
         run_test("fft_test");
     end
 

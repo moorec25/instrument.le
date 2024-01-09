@@ -92,6 +92,9 @@ module address_gen (/*AUTOARG*/
 
             COUNTING: begin
                 bfly_count_q <= bfly_count_q + 1'b1;
+                if (&bfly_count_q && fft_level == (`LEVELS-1)) begin
+                    twiddle_mask <= {`LEVELS{1'b0}};
+                end
             end
         endcase
     end

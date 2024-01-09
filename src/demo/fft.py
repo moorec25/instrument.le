@@ -47,8 +47,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    input_file = '{}/{}/mixture.wav'.format(os.environ.get("TEST_HOME"), args.testname)
-
     if args.numsamples is None:
         samples = 4096
     else:
@@ -58,9 +56,12 @@ if __name__ == "__main__":
         print('Samples must be a power of 2')
         exit(1)
 
-    mixture, Fs = librosa.load(input_file, sr=None)
-
-    mixture = mixture[0:samples]
+    if (args.testname != "random"):
+        input_file = '{}/{}/mixture.wav'.format(os.environ.get("TEST_HOME"), args.testname)
+        mixture, Fs = librosa.load(input_file, sr=None)
+        mixture = mixture[0:samples]
+    else:
+        mixture = 2 * np.random.random(samples) - 1
 
     mixture_int = (mixture * 32766).astype(np.int16)
 
