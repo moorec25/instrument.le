@@ -2,7 +2,7 @@ import os
 import librosa
 import librosa.display
 import numpy as np
-from dsp import transforms
+#from dsp import transforms
 
 
 def custom_stft(audio, Fs, frame_size, hop_size):
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     print('spectrogram shape: {}'.format(spec.shape))
 
     angels_int = (angels * 32767).astype(np.int16)
-    spec_cust = transforms.stft(angels, Fs, frame_size, hop_size)
+    spec_cust = custom_stft(angels, Fs, frame_size, hop_size)
 
     print('custom spectrogram shape: {}'.format(spec_cust.shape))
     print(np.allclose(spec, spec_cust))

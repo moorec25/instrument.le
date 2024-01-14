@@ -51,6 +51,7 @@ def umxl(
     device="cpu",
     pretrained=True,
     filterbank="torch",
+    test_name="angels"
 ):
     """
     Open Unmix Extra (UMX-L), 2-channel/stereo BLSTM Model trained on a private dataset
@@ -87,6 +88,8 @@ def umxl(
         nb_channels=2,
         sample_rate=44100.0,
         filterbank=filterbank,
+        trace_en=True,
+        test_name=test_name
     ).to(device)
 
     return separator
@@ -107,7 +110,7 @@ if __name__ == "__main__":
 
     test_name = str(sys.argv[1])
 
-    separator = umxl()
+    separator = umxl(test_name=test_name)
 
     testdir = os.environ.get("TEST_HOME")
     test_path = testdir + "/" + test_name + "/mixture.wav"

@@ -8,6 +8,7 @@ from torch import Tensor
 from torch.nn import LSTM, BatchNorm1d, Linear, Parameter
 from filtering import wiener
 from transforms import make_filterbanks, ComplexNorm
+from traces import Traces
 
 
 class OpenUnmix(nn.Module):
@@ -96,6 +97,7 @@ class OpenUnmix(nn.Module):
 
         self.output_scale = Parameter(torch.ones(self.nb_output_bins).float())
         self.output_mean = Parameter(torch.ones(self.nb_output_bins).float())
+
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -206,6 +208,8 @@ class Separator(nn.Module):
         nb_channels: int = 2,
         wiener_win_len: Optional[int] = 300,
         filterbank: str = "torch",
+        trace_en: bool = False,
+        test_name: str = ""
     ):
         super(Separator, self).__init__()
 
@@ -214,6 +218,7 @@ class Separator(nn.Module):
         self.residual = residual
         self.softmask = softmask
         self.wiener_win_len = wiener_win_len
+        self.trace_en = trace_en
 
         self.stft, self.istft = make_filterbanks(
             n_fft=n_fft,
@@ -231,6 +236,8 @@ class Separator(nn.Module):
         # get the sample_rate as the sample_rate of the first model
         # (tacitly assume it's the same for all targets)
         self.register_buffer("sample_rate", torch.as_tensor(sample_rate))
+
+        self.traces = Traces(test_name)
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -258,6 +265,9 @@ class Separator(nn.Module):
         # (nb_samples, nb_channels, nb_bins, nb_frames, 2)
         mix_stft = self.stft(audio)
         X = self.complexnorm(mix_stft)
+        if self.trace_en:
+            self.traces.dump_trace(mix_stft, "mix_stft")
+            self.traces.dump_trace(X, "mix_spectrogram")
 
         # initializing spectrograms variable
         spectrograms = torch.zeros(X.shape + (nb_sources,), dtype=audio.dtype, device=X.device)
@@ -266,6 +276,8 @@ class Separator(nn.Module):
             # apply current model to get the source spectrogram
             target_spectrogram = target_module(X.detach().clone())
             spectrograms[..., j] = target_spectrogram
+            if self.trace_en:
+                self.traces.dump_trace(target_spectrogram, target_name)
 
         # transposing it as
         # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
@@ -309,7 +321,6 @@ class Separator(nn.Module):
                     softmask=self.softmask,
                     residual=self.residual,
                 )
-
         # getting to (nb_samples, nb_targets, channel, fft_size, n_frames, 2)
         targets_stft = targets_stft.permute(0, 5, 3, 2, 1, 4).contiguous()
 
