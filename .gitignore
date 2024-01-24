@@ -4,3 +4,4 @@ out/
 gitAccess.txt
 .vscode/
 *vivado*
+node_modules/
