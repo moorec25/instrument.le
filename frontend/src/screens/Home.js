@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 // Map of buttons to the screen they navigate to
 const screenMap = {
-    'Play':     'PlaySeparate',
+    'Play':     'Game',
     'Separate': 'FindSeparate',
     'Listen':   'ChooseSong'
 }

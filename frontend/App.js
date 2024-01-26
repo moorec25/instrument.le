@@ -15,23 +15,23 @@ const Stack = createNativeStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={({ navigation }) => ({
-          headerLeft: () => (
-            <Button
-              onPress={() => navigation.goBack()}
-              title="Back"
-              color="#000"
-            />
-          )
-          })}
-      >
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Game" component={Game} />
-        <Stack.Screen name="ChooseSong" component={ChooseSong} />
-        <Stack.Screen name="PlaySeparate" component={PlaySeparate} />
-        <Stack.Screen name="FindSeparate" component={FindSeparate} />
-      </Stack.Navigator>
+    	<Stack.Navigator
+    	  screenOptions={({ navigation }) => ({
+    	    headerLeft: () => (
+    	      <Button
+    	        onPress={() => navigation.goBack()}
+    	        title="Back"
+    	        color="#000"
+    	      />
+    	    )
+    	    })}
+    	>
+    	  <Stack.Screen name="Home" component={Home} />
+    	  <Stack.Screen name="Game" component={Game} />
+    	  <Stack.Screen name="ChooseSong" component={ChooseSong} />
+    	  <Stack.Screen name="PlaySeparate" component={PlaySeparate} />
+    	  <Stack.Screen name="FindSeparate" component={FindSeparate} />
+    	</Stack.Navigator>
     </NavigationContainer>
   );
 };
