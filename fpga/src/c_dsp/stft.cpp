@@ -8,8 +8,8 @@ int main (int argc, char *argv[]) {
         exit(1);
     }
     
-    char in_file_name[] = "/fft_in.txt";
-    char out_file_name[] = "/fft_out_c.txt";
+    char in_file_name[] = "/stft_in.txt";
+    char out_file_name[] = "/stft_out_c.txt";
     char *test_path = argv[2];
 
     char *in_file_path = NULL;
@@ -40,7 +40,7 @@ int main (int argc, char *argv[]) {
     fft.calcFFT();
 
     // Write to output file
-    fft.writeOutput(output_file, false);
+    fft.writeOutput(output_file, true);
 
     fclose(input_file);
     fclose(output_file);

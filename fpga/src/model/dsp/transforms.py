@@ -25,3 +25,27 @@ def stft(x, n_fft, hop_size, center=True):
         output_stft[frame] = np.fft.fft(win_frame, n=n_fft)[0:n_bins]
 
     return output_stft.transpose()
+
+
+def istft(X, n_fft, hop_size, center=True):
+
+    window = np.hanning(n_fft)
+    window[1:-1] = 1 / window[1:-1]
+
+    n_frames = X.shape[1]
+    n_samples = (n_frames - 1) * hop_size + n_fft
+    stft = X.transpose()
+    output_istft = np.zeros(n_samples, dtype=complex)
+
+    for frame in range(n_frames-1):
+        frame_fft = stft[frame+1]
+        frame_fft = np.concatenate((frame_fft, np.flip(np.conjugate(frame_fft[1:-1]))))
+        inverse = np.fft.ifft(frame_fft, n=n_fft) * window
+        output_istft[(frame + 1) * hop_size:(frame + 1) * hop_size + n_fft] += inverse
+
+    if center:
+        output_istft = output_istft[int(n_fft / 2):]
+
+    output_istft = np.real(output_istft)
+
+    return output_istft

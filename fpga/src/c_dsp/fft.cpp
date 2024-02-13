@@ -152,9 +152,10 @@ void FFT::loadRam(FILE *fp) {
     }
 }
 
-void FFT::writeOutput(FILE *fp) {
+void FFT::writeOutput(FILE *fp, bool symmetry) {
 
     int32_t real, imag;
+    uint16_t n = symmetry ? nFFT / 2 + 1 : nFFT;
 
     DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
 

@@ -6,7 +6,6 @@ import os
 import torchaudio
 from pathlib import Path
 
-
 def umxl_spec(targets=None, device="cpu", pretrained=True):
     from model import OpenUnmix
 
