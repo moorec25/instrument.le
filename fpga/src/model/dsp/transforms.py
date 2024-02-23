@@ -22,30 +22,75 @@ def stft(x, n_fft, hop_size, center=True):
     for frame in range(n_frames):
         x = x_pad[frame * hop_size:frame * hop_size + n_fft]
         win_frame = x * window
-        output_stft[frame] = np.fft.fft(win_frame, n=n_fft)[0:n_bins]
+        output_stft[frame] = np.fft.rfft(win_frame, n=n_fft)
 
     return output_stft.transpose()
 
 
-def istft(X, n_fft, hop_size, center=True):
+def istft(X, n_fft=None, hop_size=None, center=True, window=None):
 
-    window = np.hanning(n_fft)
-    window[1:-1] = 1 / window[1:-1]
+    shape = list(X.shape)
 
-    n_frames = X.shape[1]
-    n_samples = (n_frames - 1) * hop_size + n_fft
-    stft = X.transpose()
-    output_istft = np.zeros(n_samples, dtype=complex)
+    if n_fft is None:
+        n_fft = (shape[0] - 1) * 2
 
-    for frame in range(n_frames-1):
-        frame_fft = stft[frame+1]
-        frame_fft = np.concatenate((frame_fft, np.flip(np.conjugate(frame_fft[1:-1]))))
-        inverse = np.fft.ifft(frame_fft, n=n_fft) * window
-        output_istft[(frame + 1) * hop_size:(frame + 1) * hop_size + n_fft] += inverse
+    if hop_size is None:
+        hop_size = int(n_fft // 4)
+
+    if window is None:
+        window = np.hanning(n_fft)
+
+    window = window.reshape(n_fft, 1)
+
+    n_frames = shape[1]
+
+    signal_length = (n_frames - 1) * hop_size + n_fft
+
+    y = np.zeros(signal_length)
+
+    ytmp = window * np.fft.irfft(X, n=n_fft, axis=-2)
+
+    __overlap_add(y, ytmp, hop_size)
+
+    window_sum = __window_sumsquare(window, n_frames, hop_size, n_fft)
+
+    nonzero_indices = window_sum > 0
+
+    y[nonzero_indices] /= window_sum[nonzero_indices]
 
     if center:
-        output_istft = output_istft[int(n_fft / 2):]
+        y = y[int(n_fft // 2):-int(n_fft // 2)]
 
-    output_istft = np.real(output_istft)
+    return y
 
-    return output_istft
+
+def __overlap_add(y, ytmp, hop_size):
+    """Perform overlap add
+    y: output buffer
+    ytmp: windowed frames of shape (n_fft, n_frames)
+    hop_size: window hop size"""
+
+    n_fft = ytmp.shape[0]
+    N = n_fft
+    n_frames = ytmp.shape[1]
+
+    for frame in range(n_frames):
+        sample = frame * hop_size
+        if N > y.shape[-1] - sample:
+            N = y.shape[-1] - sample
+
+        y[sample:sample + N] += ytmp[:N, frame]
+
+
+def __window_sumsquare(window, n_frames, hop_size, n_fft):
+
+    signal_length = (n_frames - 1) * hop_size + n_fft
+    w = np.zeros(signal_length)
+
+    win_sq = np.square(window).reshape(n_fft)
+
+    for frame in range(n_frames):
+        sample = frame * hop_size
+        w[sample:sample + n_fft] += win_sq
+
+    return w
