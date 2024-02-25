@@ -25,12 +25,24 @@ def dump_output(test_name, output_stft):
     file = open('{}/stft_out_py.txt'.format(outdir), 'w')
 
     n_bins = output_stft.shape[1]
+    print(n_bins)
 
     for frame in output_stft:
         for i in range(n_bins):
             file.write('{} {}\n'.format(frame[i].real, frame[i].imag))
 
     file.close()
+
+
+def dump_window(test_name, window):
+
+    outdir = get_outdir(test_name)
+    file = open('{}/window.txt'.format(outdir), 'w')
+
+    for sample in window:
+        file.write(str(sample) + '\n')
+
+    file.close
 
 
 def get_outdir(test_name):
@@ -76,15 +88,16 @@ if __name__ == "__main__":
         print('number of frames must be greater than zero')
         exit(1)
 
+    window = np.hanning(n_fft)
+    window = (window * 32767).astype(np.int16)
     samples = n_fft + hop_size * (args.frames - 1)
-    print(samples)
     mixture_file = '{}/{}/mixture.wav'.format(os.environ.get("TEST_HOME"), args.testname)
     mixture, Fs = librosa.load(mixture_file, sr=None)
     mixture = mixture[0:samples]
 
     mixture_int = (mixture * 32767).astype(np.int16)
 
-    mixture_stft = transforms.stft(mixture, n_fft, hop_size)
+    mixture_stft = transforms.stft(mixture, n_fft, hop_size, norm="ortho")
 
     x = np.pad(mixture_int, (int(n_fft / 2), 0))
     x_pad = x if x.shape[0] % n_fft == 0 else \
@@ -92,3 +105,4 @@ if __name__ == "__main__":
 
     dump_input_samples(args.testname, x_pad)
     dump_output(args.testname, mixture_stft.transpose())
+    dump_window(args.testname, window)

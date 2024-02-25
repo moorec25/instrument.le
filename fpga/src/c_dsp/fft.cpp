@@ -152,6 +152,14 @@ void FFT::loadRam(FILE *fp) {
     }
 }
 
+void FFT:: loadRam(uint16_t * samples) {
+    
+    for (int i=0; i<nFFT; i++) {
+        dpram0.memWrite(i, signExtend(samples[i], 16), 0);
+        printf("%d\n", (int16_t) samples[i]);
+    }
+}
+
 void FFT::writeOutput(FILE *fp, bool symmetry) {
 
     int32_t real, imag;
@@ -159,11 +167,24 @@ void FFT::writeOutput(FILE *fp, bool symmetry) {
 
     DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
 
-    for (int i=0; i<nFFT; i++) {
+    for (int i=0; i<n; i++) {
         ram.memRead(i, real, imag);
         fprintf(fp, "%d %d\n", real, imag);
     }
 
+}
+
+void FFT::writeOutput(int32_t * real, int32_t * imag, bool symmetry) {
+   
+    int32_t real_s, imag_s;
+    uint16_t n = symmetry ? nFFT / 2 + 1 : nFFT;
+
+    DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
+    for (int i=0; i<n; i++) {
+        ram.memRead(i, real_s, imag_s);
+        real[i] = real_s;
+        imag[i] = imag_s;
+    }
 }
 
 int32_t FFT::signExtend(uint32_t x, uint8_t N) {

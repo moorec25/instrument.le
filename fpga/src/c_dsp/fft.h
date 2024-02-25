@@ -12,7 +12,9 @@ class FFT {
         void calcFFT();
         const uint16_t nFFT;
         void loadRam(FILE *fp);
+        void loadRam(uint16_t * samples);
         void writeOutput(FILE *fp, bool symmetry);
+        void writeOutput(int32_t * real, int32_t * imag, bool symmetry);
 #ifdef FFT_TRACE_EN
         FILE * fp_mem_wr_trace;
 #endif

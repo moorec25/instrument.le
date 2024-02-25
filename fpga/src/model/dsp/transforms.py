@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def stft(x, n_fft, hop_size, center=True):
+def stft(x, n_fft, hop_size, center=True, norm="forward"):
 
     # Create hann window of window size = n_fft
     window = np.hanning(n_fft)
@@ -22,7 +22,7 @@ def stft(x, n_fft, hop_size, center=True):
     for frame in range(n_frames):
         x = x_pad[frame * hop_size:frame * hop_size + n_fft]
         win_frame = x * window
-        output_stft[frame] = np.fft.rfft(win_frame, n=n_fft)
+        output_stft[frame] = np.fft.rfft(win_frame, n=n_fft, norm=norm)
 
     return output_stft.transpose()
 
