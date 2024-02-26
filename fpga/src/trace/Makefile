@@ -3,6 +3,12 @@ RUNDIR = $(OUT_HOME)/$(TEST_NAME)
 .PHONY: clean 
 .SILENT: rundir
 
+stft: $(RUNDIR)/.pystftdone
+
+$(RUNDIR)/.pystftdone: fft.py | rundir
+	python stft.py -t $(TEST_NAME) -s $(N_FFT) -m $(HOP_SIZE)
+	touch $(RUNDIR)/.pystftdone
+
 fft: $(RUNDIR)/.pyfftdone
 
 $(RUNDIR)/.pyfftdone: fft.py | rundir

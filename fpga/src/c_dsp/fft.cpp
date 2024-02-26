@@ -152,11 +152,10 @@ void FFT::loadRam(FILE *fp) {
     }
 }
 
-void FFT:: loadRam(uint16_t * samples) {
+void FFT:: loadRam(int16_t * samples) {
     
     for (int i=0; i<nFFT; i++) {
-        dpram0.memWrite(i, signExtend(samples[i], 16), 0);
-        printf("%d\n", (int16_t) samples[i]);
+        dpram0.memWrite(i, samples[i], 0);
     }
 }
 

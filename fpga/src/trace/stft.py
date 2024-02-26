@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-s', '--fft_size', type=int)
 
-    parser.add_argument('-f', '--frames', type=int, required=True)
+    parser.add_argument('-f', '--frames', type=int)
 
     parser.add_argument('-m', '--hop_size', type=int)
 
@@ -84,19 +84,16 @@ if __name__ == "__main__":
     else:
         hop_size = args.hop_size
 
-    if args.frames <= 0:
-        print('number of frames must be greater than zero')
-        exit(1)
-
     window = np.hanning(n_fft)
     window = (window * 32767).astype(np.int16)
-    samples = n_fft + hop_size * (args.frames - 1)
     mixture_file = '{}/{}/mixture.wav'.format(os.environ.get("TEST_HOME"), args.testname)
     mixture, Fs = librosa.load(mixture_file, sr=None)
-    mixture = mixture[0:samples]
+
+    if args.frames is not None:
+        samples = n_fft + hop_size * (args.frames - 1)
+        mixture = mixture[0:samples]
 
     mixture_int = (mixture * 32767).astype(np.int16)
-
     mixture_stft = transforms.stft(mixture, n_fft, hop_size, norm="ortho")
 
     x = np.pad(mixture_int, (int(n_fft / 2), 0))

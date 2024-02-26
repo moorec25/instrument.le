@@ -34,7 +34,7 @@ $(RUNDIR)/.cfftdone: $(BUILDDIR)/fft | rundir
 	touch $(RUNDIR)/.cfftdone
 
 $(RUNDIR)/.cstftdone: $(BUILDDIR)/stft | rundir
-	$(BUILDDIR)/stft $(N_FFT) $(HOP_SIZE) $(FRAMES) $(RUNDIR)
+	$(BUILDDIR)/stft $(N_FFT) $(HOP_SIZE) $(RUNDIR)
 	touch $(RUNDIR)/.cstftdone
 
 rundir:
