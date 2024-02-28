@@ -6,7 +6,7 @@ RUNDIR = $(OUT_HOME)/$(TEST_NAME)
 stft: $(RUNDIR)/.pystftdone
 
 $(RUNDIR)/.pystftdone: fft.py | rundir
-	python stft.py -t $(TEST_NAME) -s $(N_FFT) -m $(HOP_SIZE)
+	python stft.py -t $(TEST_NAME) -s $(N_FFT) -m $(HOP_SIZE) -c $(CHANNELS)
 	touch $(RUNDIR)/.pystftdone
 
 fft: $(RUNDIR)/.pyfftdone
