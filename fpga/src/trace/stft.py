@@ -121,7 +121,7 @@ if __name__ == "__main__":
             np.pad(x_r, (0, n_fft - x_r.shape[0] % n_fft), 'constant')
 
         dump_stimulus(args.testname, window, 'window.txt')
-        dump_stimulus(args.testname, x_l_pad, 'stft_in_l.txt')
-        dump_stimulus(args.testname, x_r_pad, 'stft_in_r.txt')
-        dump_output(args.testname, mixture_stft_l.transpose(), 'stft_out_l_py.txt')
-        dump_output(args.testname, mixture_stft_r.transpose(), 'stft_out_r_py.txt')
+        dump_stimulus(args.testname, x_l_pad, 'stft_in_0.txt')
+        dump_stimulus(args.testname, x_r_pad, 'stft_in_1.txt')
+        dump_output(args.testname, mixture_stft_l.transpose(), 'stft_out_py_0.txt')
+        dump_output(args.testname, mixture_stft_r.transpose(), 'stft_out_py_1.txt')
