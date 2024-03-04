@@ -2,36 +2,36 @@
 
 module fft_wrapper(/*AUTOARG*/
    // Outputs
-   s_axis_tready, m_axis_tvalid, m_axis_tlast, m_axis_tkeep,
-   m_axis_tdata, fft_busy,
+   m_axis_tvalid, m_axis_tlast, m_axis_tkeep, m_axis_tdata, fft_busy,
+   axis_win2fft_tready,
    // Inputs
-   s_axis_tvalid, s_axis_tlast, s_axis_tkeep, s_axis_tdata,
-   m_axis_tready, fft_go, clk, resetn
+   m_axis_tready, fft_go, clk, axis_win2fft_tvalid,
+   axis_win2fft_tlast, axis_win2fft_tkeep, axis_win2fft_tdata, reset
    );
 
     parameter FFT_SIZE = 4096;
     parameter SAMPLE_WIDTH = 16;
-    parameter TWIDDLE_WIDTH = 50;
+    parameter REAL_INPUT = 1;
 
-    input resetn;
+    input reset;
     /*AUTOINPUT*/
     // Beginning of automatic inputs (from unused autoinst inputs)
+    input [`IN_AXI_WIDTH-1:0] axis_win2fft_tdata;// To axis_slave of axis_bram_slave.v
+    input [`IN_BYTE_COUNT-1:0] axis_win2fft_tkeep;// To axis_slave of axis_bram_slave.v
+    input		axis_win2fft_tlast;	// To axis_slave of axis_bram_slave.v
+    input		axis_win2fft_tvalid;	// To axis_slave of axis_bram_slave.v
     input		clk;			// To top_ctrl of fft_top_ctrl.v, ...
     input		fft_go;			// To top_ctrl of fft_top_ctrl.v
     input		m_axis_tready;		// To axis_master of axis_bram_master.v
-    input [`AXI_WIDTH-1:0] s_axis_tdata;	// To axis_slave of axis_bram_slave.v
-    input [`BYTE_COUNT-1:0] s_axis_tkeep;	// To axis_slave of axis_bram_slave.v
-    input		s_axis_tlast;		// To axis_slave of axis_bram_slave.v
-    input		s_axis_tvalid;		// To axis_slave of axis_bram_slave.v
     // End of automatics
     /*AUTOOUTPUT*/
     // Beginning of automatic outputs (from unused autoinst outputs)
+    output		axis_win2fft_tready;	// From axis_slave of axis_bram_slave.v
     output		fft_busy;		// From top_ctrl of fft_top_ctrl.v
-    output [`AXI_WIDTH-1:0] m_axis_tdata;	// From axis_master of axis_bram_master.v
-    output [`BYTE_COUNT-1:0] m_axis_tkeep;	// From axis_master of axis_bram_master.v
+    output [`OUT_AXI_WIDTH-1:0] m_axis_tdata;	// From axis_master of axis_bram_master.v
+    output [`OUT_BYTE_COUNT-1:0] m_axis_tkeep;	// From axis_master of axis_bram_master.v
     output		m_axis_tlast;		// From axis_master of axis_bram_master.v
     output		m_axis_tvalid;		// From axis_master of axis_bram_master.v
-    output		s_axis_tready;		// From axis_slave of axis_bram_slave.v
     // End of automatics
     
     /*AUTOWIRE*/
@@ -63,14 +63,12 @@ module fft_wrapper(/*AUTOARG*/
     wire		fft_wea;		// From agu of address_gen.v
     wire		fft_web;		// From agu of address_gen.v
     wire		rmem_id;		// From top_ctrl of fft_top_ctrl.v
-    wire [TWIDDLE_WIDTH-1:0] twiddle;		// From twiddles of twiddle_rom.v
+    wire [`TWIDDLE_WIDTH-1:0] twiddle;		// From twiddles of twiddle_rom.v
     wire [`LEVELS-2:0]	twiddle_addr;		// From agu of address_gen.v
     wire		wmem_id;		// From top_ctrl of fft_top_ctrl.v
     // End of automatics
     
     wire scale = fft_level[0];
-    wire reset;
-    assign reset = ~resetn;
     fft_top_ctrl #(/*AUTOINSTPARAM*/
 		   // Parameters
 		   .FFT_SIZE		(FFT_SIZE)) top_ctrl
@@ -97,8 +95,7 @@ module fft_wrapper(/*AUTOARG*/
     butterfly #(/*AUTOINSTPARAM*/
 		// Parameters
 		.FFT_SIZE		(FFT_SIZE),
-		.SAMPLE_WIDTH		(SAMPLE_WIDTH),
-		.TWIDDLE_WIDTH		(TWIDDLE_WIDTH)) bfu
+		.SAMPLE_WIDTH		(SAMPLE_WIDTH)) bfu
     (/*AUTOINST*/
      // Outputs
      .fft_wdataa			(fft_wdataa[`DATA_WIDTH-1:0]),
@@ -107,7 +104,7 @@ module fft_wrapper(/*AUTOARG*/
      .clk				(clk),
      .fft_rdataa			(fft_rdataa[`DATA_WIDTH-1:0]),
      .fft_rdatab			(fft_rdatab[`DATA_WIDTH-1:0]),
-     .twiddle				(twiddle[TWIDDLE_WIDTH-1:0]),
+     .twiddle				(twiddle[`TWIDDLE_WIDTH-1:0]),
      .scale				(scale));
 
     address_gen #(/*AUTOINSTPARAM*/
@@ -161,11 +158,10 @@ module fft_wrapper(/*AUTOARG*/
 
     twiddle_rom #(/*AUTOINSTPARAM*/
 		  // Parameters
-		  .FFT_SIZE		(FFT_SIZE),
-		  .TWIDDLE_WIDTH	(TWIDDLE_WIDTH)) twiddles
+		  .FFT_SIZE		(FFT_SIZE)) twiddles
     (/*AUTOINST*/
      // Outputs
-     .twiddle				(twiddle[TWIDDLE_WIDTH-1:0]),
+     .twiddle				(twiddle[`TWIDDLE_WIDTH-1:0]),
      // Inputs
      .clk				(clk),
      .twiddle_addr			(twiddle_addr[$clog2(`NUM_TWIDDLES)-1:0]));
@@ -173,7 +169,8 @@ module fft_wrapper(/*AUTOARG*/
     axis_bram_master #(/*AUTOINSTPARAM*/
 		       // Parameters
 		       .SAMPLE_WIDTH	(SAMPLE_WIDTH),
-		       .FFT_SIZE	(FFT_SIZE)) axis_master
+		       .FFT_SIZE	(FFT_SIZE),
+		       .REAL_INPUT	(REAL_INPUT)) axis_master
     (/*AUTOINST*/
      // Outputs
      .axis_bram_master_busy		(axis_bram_master_busy),
@@ -181,8 +178,8 @@ module fft_wrapper(/*AUTOARG*/
      .axis_mem2m_clken			(axis_mem2m_clken),
      .m_axis_tvalid			(m_axis_tvalid),
      .m_axis_tlast			(m_axis_tlast),
-     .m_axis_tdata			(m_axis_tdata[`AXI_WIDTH-1:0]),
-     .m_axis_tkeep			(m_axis_tkeep[`BYTE_COUNT-1:0]),
+     .m_axis_tdata			(m_axis_tdata[`OUT_AXI_WIDTH-1:0]),
+     .m_axis_tkeep			(m_axis_tkeep[`OUT_BYTE_COUNT-1:0]),
      // Inputs
      .clk				(clk),
      .reset				(reset),
@@ -200,14 +197,14 @@ module fft_wrapper(/*AUTOARG*/
      .axis_s2mem_waddr			(axis_s2mem_waddr[`ADDR_WIDTH-1:0]),
      .axis_s2mem_wdata			(axis_s2mem_wdata[`DATA_WIDTH-1:0]),
      .axis_s2mem_we			(axis_s2mem_we),
-     .s_axis_tready			(s_axis_tready),
+     .axis_win2fft_tready		(axis_win2fft_tready),
      // Inputs
      .clk				(clk),
      .reset				(reset),
      .axis_bram_slave_go		(axis_bram_slave_go),
-     .s_axis_tvalid			(s_axis_tvalid),
-     .s_axis_tlast			(s_axis_tlast),
-     .s_axis_tdata			(s_axis_tdata[`AXI_WIDTH-1:0]),
-     .s_axis_tkeep			(s_axis_tkeep[`BYTE_COUNT-1:0]));
+     .axis_win2fft_tvalid		(axis_win2fft_tvalid),
+     .axis_win2fft_tlast		(axis_win2fft_tlast),
+     .axis_win2fft_tdata		(axis_win2fft_tdata[`IN_AXI_WIDTH-1:0]),
+     .axis_win2fft_tkeep		(axis_win2fft_tkeep[`IN_BYTE_COUNT-1:0]));
 
 endmodule

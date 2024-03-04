@@ -34,6 +34,11 @@ int main (int argc, char *argv[]) {
 
         STFT stft = STFT(fftSize, hopSize, input_file, output_file, window_file);
 
+#ifdef FFT_TRACE_EN
+        char mem_wr_trace_path[200];
+        sprintf(mem_wr_trace_path, "%s%s_%d.txt", test_path, "/fft_mem_wr_trace", i);
+        stft.fft.fp_mem_wr_trace = fopen(mem_wr_trace_path, "w");
+#endif
         stft.calcSTFT();
 
         fclose(input_file);
@@ -96,7 +101,7 @@ void STFT::calcSTFT() {
 void STFT::output_trace() {
     int n = fftSize/2 + 1;
     for (int i=0; i<n; i++) {
-        fprintf(output_file, "%f %f\n", output_buffer_r[i] / 32768.0, output_buffer_i[i] / 32768.0);
+        fprintf(output_file, "%d %d\n", output_buffer_r[i], output_buffer_i[i]);
     }
 }
 

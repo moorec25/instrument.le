@@ -9,16 +9,14 @@ module butterfly(/*AUTOARG*/
 
     parameter FFT_SIZE = 4096;
     parameter SAMPLE_WIDTH = 16;
-    parameter TWIDDLE_WIDTH = 50;
     localparam DELAY_PIPE = 4;
 
     input clk;
 
-    // TODO find optimal bit width for samples
     input [`DATA_WIDTH-1:0] fft_rdataa;
     input [`DATA_WIDTH-1:0] fft_rdatab;
 
-    input [TWIDDLE_WIDTH-1:0] twiddle;
+    input [`TWIDDLE_WIDTH-1:0] twiddle;
 
     output [`DATA_WIDTH-1:0] fft_wdataa;
     output [`DATA_WIDTH-1:0] fft_wdatab;

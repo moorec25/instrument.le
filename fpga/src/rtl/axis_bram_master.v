@@ -12,6 +12,7 @@ module axis_bram_master(/*AUTOARG*/
 
     parameter SAMPLE_WIDTH = 16;
     parameter FFT_SIZE = 4096;
+    parameter REAL_INPUT = 1;
 
     input clk, reset;
 
@@ -29,12 +30,12 @@ module axis_bram_master(/*AUTOARG*/
     // AXI stream signals
     output m_axis_tvalid;
     output m_axis_tlast;
-    output [`AXI_WIDTH-1:0] m_axis_tdata;
-    output [`BYTE_COUNT-1:0] m_axis_tkeep;
+    output [`OUT_AXI_WIDTH-1:0] m_axis_tdata;
+    output [`OUT_BYTE_COUNT-1:0] m_axis_tkeep;
     input m_axis_tready;
 
-    wire [`AXI_WIDTH/2-1:0] data_r;
-    wire [`AXI_WIDTH/2-1:0] data_i;
+    wire [`OUT_AXI_WIDTH/2-1:0] data_r;
+    wire [`OUT_AXI_WIDTH/2-1:0] data_i;
 
     // States
     localparam IDLE = 6'b000001,
@@ -48,15 +49,15 @@ module axis_bram_master(/*AUTOARG*/
     (* fsm_encoding = "one_hot" *) reg [5:0] axis_master_state_q;
 
     wire done_reading;
-    assign done_reading = &axis_mem2m_raddr;
+    assign done_reading = (REAL_INPUT == 1) ? (axis_mem2m_raddr == FFT_SIZE/2) : &axis_mem2m_raddr; // For a real input, fft is symettrical so only send half
 
     assign axis_bram_master_busy = axis_master_state_q != IDLE;
 
-    assign m_axis_tkeep = {`BYTE_COUNT{1'b1}}; // Will always be using all bytes so tie tkeep high
+    assign m_axis_tkeep = {`OUT_BYTE_COUNT{1'b1}}; // Will always be using all bytes so tie tkeep high
 
     // Sign extend data and pack into 64 bits
-    assign data_r = { {(`AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH-1]}}, axis_mem2m_rdata[`DATA_WIDTH-1:`DATA_WIDTH/2] };
-    assign data_i = { {(`AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH/2-1]}}, axis_mem2m_rdata[`DATA_WIDTH/2-1:0] };
+    assign data_r = { {(`OUT_AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH-1]}}, axis_mem2m_rdata[`DATA_WIDTH-1:`DATA_WIDTH/2] };
+    assign data_i = { {(`OUT_AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH/2-1]}}, axis_mem2m_rdata[`DATA_WIDTH/2-1:0] };
     assign m_axis_tdata = {data_r, data_i}; // Wire memory read data to stream data port
 
     // Write data is valid in these 3 states
@@ -98,7 +99,7 @@ module axis_bram_master(/*AUTOARG*/
                 end
 
                 READ_SEND: begin
-                    if (done_reading) begin
+                    if (done_reading & m_axis_tready) begin
                         axis_master_state_q <= SEND0;
                     end
                 end

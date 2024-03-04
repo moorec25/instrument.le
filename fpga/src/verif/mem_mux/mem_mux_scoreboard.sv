@@ -5,13 +5,15 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
     uvm_analysis_imp #(mem_mux_seq_item_t, mem_mux_scoreboard_t) mem_mux_trans_imp;
 
     int mem_trace;
+    string trace_path;
 
     mem_mux_seq_item_t trans_q[$];
     mem_mux_seq_item_t actual;
     mem_mux_seq_item_t expected;
 
-    function new(string name = "mem_mux_scoreboard_t", uvm_component parent);
+    function new(string name = "mem_mux_scoreboard_t", uvm_component parent, string trace_path = "");
         super.new(name, parent);
+        this.trace_path = trace_path;
     endfunction
 
     virtual function void build_phase(uvm_phase phase);
@@ -20,7 +22,7 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
         mem_mux_trans_imp = new("mem_mux_trans_imp", this);
         expected = mem_mux_seq_item_t::type_id::create("expected", this);
 
-        mem_trace = $fopen("/home/carter/Documents/instrument.le/out/random/fft_mem_wr_trace.txt", "r");
+        mem_trace = $fopen(trace_path, "r");
 
     endfunction : build_phase
 
@@ -35,7 +37,7 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
             actual = trans_q.pop_front();
             if (actual.compare(expected)) begin
                 `uvm_info("mem_mux_scoreboard", $sformatf("Memory Write Transaction Expected Contents: %s", expected.sprint()), UVM_HIGH);
-                `uvm_info("mem_mux_scoreboard", "Write data matching", UVM_LOW)
+                `uvm_info("mem_mux_scoreboard", "Write data matching", UVM_NONE)
             end else begin
                 `uvm_info("mem_mux_scoreboard", $sformatf("Memory Write Transaction Expected Contents: %s", expected.sprint()), UVM_NONE);
                 `uvm_info("mem_mux_scoreboard", $sformatf("Memory Write Transaction Actual Contents: %s", actual.sprint()), UVM_NONE);

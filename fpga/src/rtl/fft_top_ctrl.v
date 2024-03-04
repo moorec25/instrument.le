@@ -29,15 +29,13 @@ module fft_top_ctrl(/*AUTOARG*/
 
     output reg [$clog2(`LEVELS)-1:0] fft_level;
 
+    assign fft_busy = (fft_top_state_q != IDLE);
+
     output wmem_id;
     output rmem_id;
 
     output axis_rx;
     output axis_tx;
-
-    reg [$clog2(BFLY_LATENCY):0] delay_counter_q;
-
-    assign fft_busy = (fft_top_state_q != IDLE);
 
     assign rmem_id = fft_level[0];
     assign wmem_id = ~fft_level[0];

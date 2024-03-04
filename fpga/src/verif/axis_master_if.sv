@@ -4,8 +4,8 @@ interface axis_master_if_t(/*AUTOARG*/
    );
 
     input clk, resetn;
-    logic [63:0] tdata;
-    logic [7:0] tkeep;
+    logic [31:0] tdata;
+    logic [3:0] tkeep;
     logic tlast;
     logic tvalid;
     logic tready;

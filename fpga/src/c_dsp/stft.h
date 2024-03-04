@@ -12,6 +12,7 @@ class STFT {
         const uint16_t fftSize;
         const uint16_t hopSize;
         void calcSTFT();
+        FFT fft;
     
     private:
         void output_trace();
@@ -19,7 +20,6 @@ class STFT {
         void load_window ();
         void window_mult();
 
-        FFT fft;
         FILE * input_file;
         FILE * output_file;
         FILE * window_file;
