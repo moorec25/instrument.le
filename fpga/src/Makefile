@@ -6,6 +6,14 @@ export
 TEST_NAME ?= angels
 N_FFT ?= 4096
 HOP_SIZE ?= 1024
+CHANNELS ?= 2
+FRAMES ?= 0
+
+build_istft:
+	$(MAKE) build_istft -C c_dsp
+
+c_istft: c_stft
+	$(MAKE) run_istft -C c_dsp
 
 build_stft:
 	$(MAKE) build_stft -C c_dsp

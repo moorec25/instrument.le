@@ -8,13 +8,15 @@
 class FFT {
 
     public:
-        FFT(uint16_t size);
+        FFT(uint16_t size, bool inverse=false);
         void calcFFT();
         const uint16_t nFFT;
         void loadRam(FILE *fp);
         void loadRam(int16_t * samples);
-        void writeOutput(FILE *fp, bool symmetry);
-        void writeOutput(int32_t * real, int32_t * imag, bool symmetry);
+        void loadRam(int32_t * samples_r, int32_t * samples_i);
+        void writeOutput(FILE *fp);
+        void writeOutput(int32_t * real, int32_t * imag);
+        void writeOutput(int32_t * real);
 #ifdef FFT_TRACE_EN
         FILE * fp_mem_wr_trace;
 #endif
@@ -24,6 +26,7 @@ class FFT {
         DPRAM_64 dpram0;
         DPRAM_64 dpram1;
         const uint8_t levels;
+        bool m_inverse;
 
         void butterfly(int32_t inReal1, int32_t inImag1, int32_t inReal2, int32_t inImag2, int32_t twiddleReal, int32_t twiddleSum, int32_t twiddleDiff, int32_t &outReal1, int32_t &outImag1, int32_t &outReal2, int32_t &outImag2);
         void complexMultiply(int32_t inReal1, int32_t inImag1, int32_t twiddleReal, int32_t twiddleSum, int32_t twiddleDiff, int64_t &outReal, int64_t &outImag);

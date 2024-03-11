@@ -27,7 +27,7 @@ def stft(x, n_fft, hop_size, center=True, norm="forward"):
     return output_stft.transpose()
 
 
-def istft(X, n_fft=None, hop_size=None, center=True, window=None):
+def istft(X, n_fft=None, hop_size=None, center=True, window=None, norm="forward"):
 
     shape = list(X.shape)
 
@@ -48,7 +48,9 @@ def istft(X, n_fft=None, hop_size=None, center=True, window=None):
 
     y = np.zeros(signal_length)
 
-    ytmp = window * np.fft.irfft(X, n=n_fft, axis=-2)
+    ytmp = np.fft.irfft(X, n=n_fft, axis=-2, norm=norm)
+
+    ytmp = window * ytmp
 
     __overlap_add(y, ytmp, hop_size)
 

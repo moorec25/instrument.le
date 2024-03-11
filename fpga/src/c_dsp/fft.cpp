@@ -1,14 +1,16 @@
 #include "fft.h"
 #include <cstdio>
 
-FFT::FFT(uint16_t size) : 
+FFT::FFT(uint16_t size, bool inverse) : 
     nFFT(size), 
     dpram0(size), 
     dpram1(size), 
-    twiddles(size/2),
+    twiddles(size/2, inverse),
     levels ((uint8_t) std::log2(size)) {
 
     assert(std::ceil(log2(size)) == std::floor(log2(size)));
+
+    m_inverse = inverse;
 }
 
 void FFT::calcFFT() {
@@ -144,25 +146,45 @@ void FFT::calcTwiddleMask(uint16_t &mask, uint8_t level, uint8_t N) {
 
 void FFT::loadRam(FILE *fp) {
     
-    uint16_t sample;
+    int32_t sample_r;
+    int32_t sample_i;
 
-    for (int i=0; i<nFFT; i++) {
-        fscanf(fp, "%hd", &sample);
-        dpram0.memWrite(i, signExtend(sample, 16), 0);
+    if (!m_inverse) {
+        for (int i=0; i<nFFT; i++) {
+            fscanf(fp, "%d", &sample_r);
+            dpram0.memWrite(i, sample_r, 0);
+        }
+    } else {
+        fscanf(fp, "%d %d", &sample_r, &sample_i);
+        dpram0.memWrite(0, sample_r, sample_i);
+        for (int i=1; i<nFFT/2; i++) {
+            fscanf(fp, "%d %d", &sample_r, &sample_i);
+            dpram0.memWrite(i, sample_r, sample_i);
+            dpram0.memWrite(nFFT - i, sample_r, -1*sample_i);
+        }
+        fscanf(fp, "%d %d", &sample_r, &sample_i);
+        dpram0.memWrite(nFFT/2, sample_r, sample_i);
     }
 }
 
-void FFT:: loadRam(int16_t * samples) {
+void FFT::loadRam(int16_t * samples) {
     
     for (int i=0; i<nFFT; i++) {
         dpram0.memWrite(i, samples[i], 0);
     }
 }
 
-void FFT::writeOutput(FILE *fp, bool symmetry) {
+void FFT::loadRam(int32_t * samples_r, int32_t * samples_i) {
+    
+    for (int i=0; i<nFFT; i++) {
+        dpram0.memWrite(i, samples_r[i], samples_i[i]);
+    }
+}
+
+void FFT::writeOutput(FILE *fp) {
 
     int32_t real, imag;
-    uint16_t n = symmetry ? nFFT / 2 + 1 : nFFT;
+    uint16_t n = m_inverse ? nFFT : nFFT / 2 + 1;
 
     DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
 
@@ -173,16 +195,28 @@ void FFT::writeOutput(FILE *fp, bool symmetry) {
 
 }
 
-void FFT::writeOutput(int32_t * real, int32_t * imag, bool symmetry) {
+void FFT::writeOutput(int32_t * real, int32_t * imag) {
    
     int32_t real_s, imag_s;
-    uint16_t n = symmetry ? nFFT / 2 + 1 : nFFT;
+    uint16_t n = m_inverse ? nFFT : nFFT / 2 + 1;
 
     DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
     for (int i=0; i<n; i++) {
         ram.memRead(i, real_s, imag_s);
         real[i] = real_s;
         imag[i] = imag_s;
+    }
+}
+
+void FFT::writeOutput(int32_t * real) {
+   
+    int32_t real_s, imag_s;
+    uint16_t n = m_inverse ? nFFT : nFFT / 2 + 1;
+
+    DPRAM_64 &ram = (levels % 2 == 0) ? dpram0 : dpram1;
+    for (int i=0; i<n; i++) {
+        ram.memRead(i, real_s, imag_s);
+        real[i] = real_s;
     }
 }
 
