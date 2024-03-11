@@ -66,6 +66,7 @@ ISTFT::~ISTFT() {
     delete m_input_buffer_i;
     delete m_overlap;
     delete m_ola_out;
+    delete m_output_buffer;
 }
 
 void ISTFT::calcISTFT() {
