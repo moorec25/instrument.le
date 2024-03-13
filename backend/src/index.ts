@@ -25,7 +25,7 @@ app.get('/startGame', (req: Request, res: Response) => {
 
 app.get('/audio/:id/:filename', (req: Request, res: Response) => {
 	console.log(`Client requesting audio file ${req.params.filename}...`)
-	// TODO: Use the id to get the song metadata
+	// TODO: Use the id to get the song metadata from database
 	const fileName = req.params.filename;
 	const filePath = path.join(__dirname, '../songs/Nirvana/Smells_Like_Teen_Spirit', fileName);
 	// Ensure the file exists
