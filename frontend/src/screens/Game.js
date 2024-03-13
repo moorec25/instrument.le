@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, ActivityIndicator, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as Animatable from 'react-native-animatable';
@@ -169,28 +169,40 @@ const Game = () => {
 			{loading && <ActivityIndicator size="large" color="#0000ff" />}
 			<Image
                 source={{ uri: metadata.album_art_url }}
-                style={styles.image}
+                style={styles.albumcover}
                 onLoadEnd={() => setLoading(false)}
+				blurRadius={3}
             />
-			<Text>Number of Guesses: {numGuesses}</Text>
-			{hintYear && <Text>Year: {metadata.year}</Text>}
-			{hintGenre && <Text>Genre: {metadata.genre}</Text>}
-			{hintAlbum && <Text>Album: {metadata.album}</Text>}
-			{hintArtist && <Text>Artist: {metadata.artist}</Text>}
-			<View style={{flexDirection: 'row', width: '90%', height: 20, backgroundColor: '#eee'}}>
-    			<View style={{flex: audioProgress, backgroundColor: 'blue'}} />
-    			<View style={{flex: 1 - audioProgress, backgroundColor: '#eee'}} />
+			<View style={{flexDirection: 'row', width: '90%', height: 10, backgroundColor: '#FFF4E6'}}>
+    			<View style={{flex: audioProgress, backgroundColor: '#BE9B7B'}} />
+    			<View style={{flex: 1 - audioProgress, backgroundColor: '#FFF4E6'}} />
 			</View>
-			<Button title="Play Sound" onPress={playAudio} />
-			<Button title="Stop Sound" onPress={stopAudio} />
-            <TextInput
-                style={styles.input}
+			<View style={styles.playstopbuttoncontainer}>
+				<TouchableHighlight onPress={playAudio}>
+					<Image style={styles.playstopbutton} source={require("../../assets/play_button.png")}/>
+				</TouchableHighlight>
+				<TouchableHighlight onPress={stopAudio}>
+					<Image style={styles.playstopbutton} source={require("../../assets/stop_button.png")}/>
+				</TouchableHighlight>
+			</View>
+			<View style={styles.numguessbox}><Text style={styles.numguesstext}>Number of Guesses: {numGuesses}</Text></View>
+			<View style={styles.hintcontainer}>
+				<View style={styles.hintbox}>{hintYear && <Text style={styles.textfont}>Year: {metadata.year}</Text>}</View>
+				<View style={styles.hintbox}>{hintGenre && <Text style={styles.textfont}>Genre: {metadata.genre}</Text>}</View>
+				<View style={styles.hintbox}>{hintAlbum && <Text style={styles.textfont}>Album: {metadata.album}</Text>}</View>
+				<View style={styles.hintbox}>{hintArtist && <Text style={styles.textfont}>Artist: {metadata.artist}</Text>}</View>
+			</View>
+			<TextInput
+                style={[styles.input, styles.textfont]}
                 onChangeText={setGuess}
                 value={guess}
                 placeholder="Enter your guess"
+				placeholderTextColor="#FFF4E6"
             />
-            <Button title="Submit Guess" onPress={handleGuessSubmit} />
-            {gameOver && <Text>Game Over!</Text>}
+            <TouchableOpacity style={styles.guessbox} onPress={handleGuessSubmit} >
+				<Text style={styles.guessfont}>Submit Guess</Text>
+			</TouchableOpacity>
+            {gameOver && <Text style={styles.textfont}>Game Over!</Text>}
 			{didWin && <Text>You Win!</Text>}
             
         </View>
@@ -202,19 +214,95 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+		backgroundColor: '#3C2F2F'
     },
-    image: {
-        width: 200,
-        height: 200,
-        marginBottom: 20,
+    albumcover: {
+        width: 300,
+        height: 300,
+        marginBottom: 25,
     },
+	playstopbutton: {
+        width: 50,
+        height: 50,
+		marginHorizontal: 10
+    },
+	playstopbuttoncontainer: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		justifyContent: 'flex-start',
+		marginTop: 10,
+		marginBottom: 5
+	},
     input: {
-        borderWidth: 1,
-        borderColor: 'gray',
+        borderWidth: 2,
+        borderColor: '#FFF4E6',
         width: '80%',
         padding: 10,
         margin: 10,
     },
+	textfont: {
+		color: '#FFF4E6',
+        textAlign: 'left',
+        fontSize: 9,
+	},
+	guessbox: {
+        alignItems: 'center',
+		backgroundColor: '#BE9B7B',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 1,
+		borderColor: '#FFF4E6',
+		padding: 10,
+		marginTop: 5,
+        marginBottom: 8,
+        marginHorizontal: 25,
+	},
+	guessfont:{
+		color: '#FFF4E6',
+        textAlign: 'center',
+        fontSize: 20,
+	},
+	hintcontainer:{
+		flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+		backgroundColor: '#3C2F2F'
+	},
+	hintbox: {
+        alignItems: 'center',
+		backgroundColor: '#BE9B7B',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 1,
+		borderColor: '#FFF4E6',
+		padding: 5,
+		marginTop: 5,
+        marginBottom: 5,
+        marginHorizontal: 3,
+	},
+	numguessbox:{
+		alignItems: 'center',
+		backgroundColor: '#BE9B7B',
+		borderTopLeftRadius: 5,
+        borderTopRightRadius: 5,
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+		borderWidth: 1,
+		borderColor: '#FFF4E6',
+		padding: 3,
+		marginTop: 5,
+        marginBottom: 5,
+        marginHorizontal: 20
+	},
+	numguesstext:{
+		color: '#FFF4E6',
+        textAlign: 'left',
+        fontSize: 15,
+	}
 });
 
 export default Game;

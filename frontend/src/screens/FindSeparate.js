@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, View, TextInput , Alert } from 'react-native';
+import { Button, View, Text, TextInput , Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Device from 'expo-device';
 import * as aws from '../apis/aws';
@@ -68,42 +68,94 @@ const FindSeparate = () => {
     }
 
     return (
-        <View>
+        <View style={styles.container}>
             <TextInput
                 placeholder="Song Name"
                 value={songName}
                 onChangeText={setSongName}
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+                placeholderTextColor= '#4B3832'
+                style={styles.input}
             />
             <TextInput
                 placeholder="Artist Name"
                 value={artistName}
                 onChangeText={setArtistName}
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+                placeholderTextColor= '#4B3832'
+                style={styles.input}
             />
             <TextInput
                 placeholder="Album Name"
                 value={albumName}
                 onChangeText={setAlbumName}
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+                placeholderTextColor= '#4B3832'
+                style={styles.input}
             />
             <TextInput
                 placeholder="Release Year"
                 value={releaseYear}
                 onChangeText={setReleaseYear}
                 keyboardType="numeric"
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+                placeholderTextColor= '#4B3832'
+                style={styles.input}
             />
             <TextInput
                 placeholder="Genre"
                 value={genre}
                 onChangeText={setGenre}
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 }}
+                placeholderTextColor= '#4B3832'
+                style={styles.input}
             />
-            <Button title="Select File" onPress={selectFile} />
-            <Button title="Upload File" onPress={uploadFile} disabled={!file || !songName || !artistName || !albumName || !releaseYear || !genre} />
+            <View style={styles.filecontainer}>
+                <TouchableOpacity style={styles.button} onPress={selectFile}>
+                    <Text style={styles.textfont}>Select File</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={uploadFile} disabled={!file || !songName || !artistName || !albumName || !releaseYear || !genre}>
+                    <Text style={styles.textfont}>Upload File</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     )
 };
+
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+		backgroundColor: '#BE9B7B'
+    },
+    filecontainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    input: {
+        borderWidth: 2,
+        borderColor: '#4B3832',
+        height: 40,
+        width: '80%',
+        padding: 10,
+        marginBottom: 12,
+    },
+    textfont:{
+        color: '#FFF4E6',
+        textAlign: 'center',
+        fontSize: 20,
+    },
+    button:{
+        alignItems: 'center',
+		backgroundColor: '#4B3832',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 2,
+		borderColor: '#FFF4E6',
+		padding: 10,
+		marginTop: 5,
+        marginHorizontal: 15,
+    }
+});
 
 export default FindSeparate;
