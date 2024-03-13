@@ -1,12 +1,13 @@
 #include "twiddle_rom.h"
 
-TwiddleRom::TwiddleRom(uint16_t size) {
+TwiddleRom::TwiddleRom(uint16_t size, bool inverse) {
 
     // Size must be a power of 2
     assert(std::ceil(log2(size)) == std::floor(log2(size)));
 
     num_twiddles = size;
     twiddles = new uint64_t[size];
+    m_inverse = inverse;
 
     generateTwiddles();
 }
@@ -21,7 +22,7 @@ void TwiddleRom::generateTwiddles() {
 
     for (int k=0; k<num_twiddles; k++) {
         double real = std::cos(-1*pi*k/num_twiddles);
-        double imag = std::sin(-1*pi*k/num_twiddles);
+        double imag = m_inverse ? std::sin(pi*k/num_twiddles) : std::sin(-1*pi*k/num_twiddles);
         
         // Store complex number as two 16 bit ints
         uint32_t real_int = (real > 0) ? real * INT16_MAX : real * (INT16_MAX+1);

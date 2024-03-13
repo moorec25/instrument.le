@@ -26,7 +26,7 @@ int main (int argc, char *argv[]) {
 
     uint16_t fftSize = std::strtol(argv[1], NULL, 10);
 
-    FFT fft = FFT(fftSize);
+    FFT fft = FFT(fftSize, true);
 
 #ifdef FFT_TRACE_EN
     char mem_wr_trace_name[] = "/fft_mem_wr_trace.txt";
@@ -40,7 +40,7 @@ int main (int argc, char *argv[]) {
     fft.calcFFT();
 
     // Write to output file
-    fft.writeOutput(output_file, false);
+    fft.writeOutput(output_file);
 
     fclose(input_file);
     fclose(output_file);

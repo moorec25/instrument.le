@@ -85,10 +85,11 @@ if __name__ == "__main__":
     mixture_file = '{}/{}/mixture.wav'.format(os.environ.get("TEST_HOME"), args.testname)
     mixture, Fs = librosa.load(mixture_file, sr=None, mono=mono)
 
-    if args.frames is not None:
+    if args.frames is not None and args.frames != 0:
         samples = n_fft + hop_size * (args.frames - 1)
         mixture = mixture[..., 0:samples]
 
+    print(len(mixture[0]))
 
     if mono:
         mixture_int = (mixture * 32767).astype(np.int16)
@@ -98,7 +99,7 @@ if __name__ == "__main__":
         x_pad = x if x.shape[0] % n_fft == 0 else \
             np.pad(x, (0, n_fft - x.shape[0] % n_fft), 'constant')
 
-        dump_stimulus(args.testname, x_pad, 'stft_in.txt')
+        dump_stimulus(args.testname, x_pad, 'stft_in_0.txt')
         dump_stimulus(args.testname, window, 'window.txt')
         dump_output(args.testname, mixture_stft.transpose(), 'stft_out_py.txt')
 

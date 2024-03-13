@@ -90,7 +90,7 @@ void STFT::calcSTFT() {
         fft.calcFFT();
 
         // Write to output file
-        fft.writeOutput(output_buffer_r, output_buffer_i, true);
+        fft.writeOutput(output_buffer_r, output_buffer_i);
 
         output_trace();
         shift_input();

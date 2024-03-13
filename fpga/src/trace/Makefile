@@ -1,4 +1,5 @@
 RUNDIR = $(OUT_HOME)/$(TEST_NAME)
+FRAMES ?= 0
 
 .PHONY: clean 
 .SILENT: rundir
@@ -6,7 +7,7 @@ RUNDIR = $(OUT_HOME)/$(TEST_NAME)
 stft: $(RUNDIR)/.pystftdone
 
 $(RUNDIR)/.pystftdone: fft.py | rundir
-	python stft.py -t $(TEST_NAME) -s $(N_FFT) -m $(HOP_SIZE) -c $(CHANNELS)
+	python stft.py -t $(TEST_NAME) -s $(N_FFT) -m $(HOP_SIZE) -c $(CHANNELS) -f $(FRAMES)
 	touch $(RUNDIR)/.pystftdone
 
 fft: $(RUNDIR)/.pyfftdone
