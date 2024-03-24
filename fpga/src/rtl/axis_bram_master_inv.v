@@ -2,12 +2,12 @@
 // AXI stream bram master
 // Writes out content of bram as an AXI stream
 
-module axis_bram_master(/*AUTOARG*/
+module axis_bram_master_inv(/*AUTOARG*/
    // Outputs
    axis_bram_master_busy, axis_mem2m_raddr, axis_mem2m_clken,
-   m_axis_tvalid, m_axis_tlast, m_axis_tdata, m_axis_tkeep,
+   axis_ifft2ola_tvalid, axis_ifft2ola_tlast, axis_ifft2ola_tdata, axis_ifft2ola_tkeep,
    // Inputs
-   clk, reset, axis_bram_master_go, axis_mem2m_rdata, m_axis_tready
+   clk, reset, axis_bram_master_go, axis_mem2m_rdata, axis_ifft2ola_tready
    );
 
     parameter SAMPLE_WIDTH = 16;
@@ -28,14 +28,11 @@ module axis_bram_master(/*AUTOARG*/
     input [`DATA_WIDTH-1:0] axis_mem2m_rdata;
 
     // AXI stream signals
-    output m_axis_tvalid;
-    output m_axis_tlast;
-    output [`OUT_AXI_WIDTH-1:0] m_axis_tdata;
-    output [`OUT_BYTE_COUNT-1:0] m_axis_tkeep;
-    input m_axis_tready;
-
-    wire [`OUT_AXI_WIDTH/2-1:0] data_r;
-    wire [`OUT_AXI_WIDTH/2-1:0] data_i;
+    output axis_ifft2ola_tvalid;
+    output axis_ifft2ola_tlast;
+    output [15:0] axis_ifft2ola_tdata;
+    output [1:0] axis_ifft2ola_tkeep;
+    input axis_ifft2ola_tready;
 
     // States
     localparam IDLE = 6'b000001,
@@ -49,23 +46,20 @@ module axis_bram_master(/*AUTOARG*/
     (* fsm_encoding = "one_hot" *) reg [5:0] axis_master_state_q;
 
     wire done_reading;
-    assign done_reading = (REAL_INPUT == 1) ? (axis_mem2m_raddr == FFT_SIZE/2) : &axis_mem2m_raddr; // For a real input, fft is symettrical so only send half
+    assign done_reading = &axis_mem2m_raddr; 
 
     assign axis_bram_master_busy = axis_master_state_q != IDLE;
 
-    assign m_axis_tkeep = {`OUT_BYTE_COUNT{1'b1}}; // Will always be using all bytes so tie tkeep high
+    assign axis_ifft2ola_tkeep = 2'b11; // Will always be using all bytes so tie tkeep high
 
-    // Sign extend data and pack into 64 bits
-    assign data_r = { {(`OUT_AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH-1]}}, axis_mem2m_rdata[`DATA_WIDTH-1:`DATA_WIDTH/2] };
-    assign data_i = { {(`OUT_AXI_WIDTH/2-`DATA_WIDTH/2){axis_mem2m_rdata[`DATA_WIDTH/2-1]}}, axis_mem2m_rdata[`DATA_WIDTH/2-1:0] };
-    assign m_axis_tdata = {data_i, data_r}; // Wire memory read data to stream data port
+    assign axis_ifft2ola_tdata = axis_mem2m_rdata[37:22]; // Wire memory read data to stream data port
 
     // Write data is valid in these 3 states
-    assign m_axis_tvalid = (axis_master_state_q == READ_SEND) | (axis_master_state_q == SEND0) | (axis_master_state_q == SEND1);
+    assign axis_ifft2ola_tvalid = (axis_master_state_q == READ_SEND) | (axis_master_state_q == SEND0) | (axis_master_state_q == SEND1);
     // Last write occurs in state SEND1
-    assign m_axis_tlast = axis_master_state_q == SEND1;
+    assign axis_ifft2ola_tlast = axis_master_state_q == SEND1;
 
-    assign axis_mem2m_clken = m_axis_tvalid ? m_axis_tready : 1'b1; // Stall mem read pipeline when slave not ready
+    assign axis_mem2m_clken = axis_ifft2ola_tvalid ? axis_ifft2ola_tready : 1'b1; // Stall mem read pipeline when slave not ready
 
     always @ (posedge clk) begin
 
@@ -99,19 +93,19 @@ module axis_bram_master(/*AUTOARG*/
                 end
 
                 READ_SEND: begin
-                    if (done_reading & m_axis_tready) begin
+                    if (done_reading & axis_ifft2ola_tready) begin
                         axis_master_state_q <= SEND0;
                     end
                 end
 
                 SEND0: begin
-                    if (m_axis_tready) begin
+                    if (axis_ifft2ola_tready) begin
                         axis_master_state_q <= SEND1;
                     end
                 end
 
                 SEND1: begin
-                    if (m_axis_tready) begin
+                    if (axis_ifft2ola_tready) begin
                         axis_master_state_q <= IDLE;
                     end
                 end
@@ -142,7 +136,7 @@ module axis_bram_master(/*AUTOARG*/
             end
 
             READ_SEND: begin
-                axis_mem2m_raddr <= m_axis_tready ? axis_mem2m_raddr + 1'b1 : axis_mem2m_raddr;
+                axis_mem2m_raddr <= axis_ifft2ola_tready ? axis_mem2m_raddr + 1'b1 : axis_mem2m_raddr;
             end
 
         endcase

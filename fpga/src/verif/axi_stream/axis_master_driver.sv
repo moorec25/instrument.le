@@ -31,6 +31,7 @@ class axis_master_driver_t extends uvm_driver #(axis_master_trans_t);
             end
             else begin
                 axis_vif.tvalid = 0;
+                axis_vif.tlast = 0;
                 this.randomize();
                 repeat (delay+1) @ (posedge axis_vif.clk);
                 `uvm_info("axis_master_driver", "Waiting for axi stream master transaction", UVM_HIGH)
@@ -38,8 +39,8 @@ class axis_master_driver_t extends uvm_driver #(axis_master_trans_t);
                 `uvm_info("axis_master_driver", $sformatf("Getting axi stream transaction from sequencer %s", req.sprint()), UVM_HIGH)
                 axis_vif.tvalid = 1;
                 axis_vif.tkeep = 8'hff;
-                axis_vif.tdata = {req.left_sample, req.right_sample};
-                axis_vif.tlast = 0;
+                axis_vif.tdata = {req.right_sample, req.left_sample};
+                axis_vif.tlast = req.last;
                 wait(axis_vif.tready);
                 @ (posedge axis_vif.clk);
                 seq_item_port.item_done();

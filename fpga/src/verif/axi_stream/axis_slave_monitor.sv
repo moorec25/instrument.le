@@ -13,6 +13,8 @@ class axis_slave_monitor_t extends uvm_monitor;
     rand bit [2:0] delay;
     constraint cycle_delay { delay dist {0:=50, [1:7]:/50}; }
 
+    int bin = 0;
+
     function new(string name = "axis_slave_monitor_t", uvm_component parent);
         super.new(name, parent);
         mon_analysis_port = new("mon_analysis_port", this);
@@ -38,12 +40,13 @@ class axis_slave_monitor_t extends uvm_monitor;
                 axis_vif.tready = 1;
                 wait(axis_vif.tvalid);
                 @ (posedge axis_vif.clk);
-                axis_trans.k_real = axis_vif.tdata[63:32];
-                axis_trans.k_imag = axis_vif.tdata[31:0];
+                axis_trans.k_imag = axis_vif.tdata[63:32];
+                axis_trans.k_real = axis_vif.tdata[31:0];
                 axis_trans.channel = channel;
                 mon_analysis_port.write(axis_trans);
-                if (axis_vif.tlast) begin
+                if (++bin == 2049) begin
                     channel = ~channel;
+                    bin = 0;
                     axis_vif.tready = 0;
                     @ (posedge axis_vif.clk);
                 end

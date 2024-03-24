@@ -26,7 +26,7 @@ module stereo_stft(/*AUTOARG*/
     // Beginning of automatic outputs (from unused autoinst outputs)
     output reg [`OUT_AXI_WIDTH-1:0] m_axis_tdata;	// From stft_left of stft_wrapper.v, ...
     output reg [`OUT_BYTE_COUNT-1:0] m_axis_tkeep;	// From stft_left of stft_wrapper.v, ...
-    output reg		m_axis_tlast;		// From stft_left of stft_wrapper.v, ...
+    output 		m_axis_tlast;		// From stft_left of stft_wrapper.v, ...
     output reg		m_axis_tvalid;		// From stft_left of stft_wrapper.v, ...
     output		s_axis_tready;		// From stft_left of stft_wrapper.v, ...
     // End of automatics
@@ -60,14 +60,32 @@ module stereo_stft(/*AUTOARG*/
 
     reg output_channel_q; 
 
+    reg last_sample;
+    reg last_frame;
+
+    assign m_axis_tlast = m_axis_tlast_r & last_frame;
+
     always @ (posedge clk) begin
         if (reset) begin
             output_channel_q <= 1'b0;
+            last_frame <= 1'b0;
         end else begin
             if (output_channel_q == 1'b0) begin
                 output_channel_q <= (m_axis_tlast_l & m_axis_tready_l) ? ~output_channel_q : output_channel_q;
             end else begin
                 output_channel_q <= (m_axis_tlast_r & m_axis_tready_r) ? ~output_channel_q : output_channel_q;
+            end
+
+            if (last_sample == 1'b1) begin
+                last_sample <= (m_axis_tlast_r & m_axis_tready_r) ? 1'b0 : 1'b1;
+            end else begin
+                last_sample <= s_axis_tlast;
+            end
+
+            if (last_frame == 1'b1) begin
+                last_frame <= (m_axis_tlast_r & m_axis_tready_r) ? 1'b0 : 1'b1;
+            end else begin
+                last_frame <= last_sample & m_axis_tlast_r & m_axis_tready_r;
             end
         end
     end
@@ -82,13 +100,11 @@ module stereo_stft(/*AUTOARG*/
         if (output_channel_q == 1'b0) begin
             m_axis_tdata = m_axis_tdata_l;
             m_axis_tkeep = m_axis_tkeep_l;
-            m_axis_tlast = m_axis_tlast_l;
             m_axis_tvalid = m_axis_tvalid_l;
             m_axis_tready_l = m_axis_tready;
         end else begin
             m_axis_tdata = m_axis_tdata_r;
             m_axis_tkeep = m_axis_tkeep_r;
-            m_axis_tlast = m_axis_tlast_r;
             m_axis_tvalid = m_axis_tvalid_r;
             m_axis_tready_r = m_axis_tready;
         end
@@ -111,8 +127,8 @@ module stereo_stft(/*AUTOARG*/
      .clk				(clk),
      .m_axis_tready			(m_axis_tready_l),
      .reset				(reset),
-     .s_axis_tdata			(s_axis_tdata[2*`IN_AXI_WIDTH-1:`IN_AXI_WIDTH]),
-     .s_axis_tkeep			(s_axis_tkeep[2*`IN_BYTE_COUNT-1:`IN_BYTE_COUNT]),
+     .s_axis_tdata			(s_axis_tdata[`IN_AXI_WIDTH-1:0]),
+     .s_axis_tkeep			(s_axis_tkeep[`IN_BYTE_COUNT-1:0]),
      .s_axis_tlast			(s_axis_tlast),
      .s_axis_tvalid			(s_axis_tvalid),
      .fft_go                (fft_go));
@@ -134,8 +150,8 @@ module stereo_stft(/*AUTOARG*/
      .clk				(clk),
      .m_axis_tready			(m_axis_tready_r),
      .reset				(reset),
-     .s_axis_tdata			(s_axis_tdata[`IN_AXI_WIDTH-1:0]),
-     .s_axis_tkeep			(s_axis_tkeep[`IN_BYTE_COUNT-1:0]),
+     .s_axis_tdata			(s_axis_tdata[2*`IN_AXI_WIDTH-1:`IN_AXI_WIDTH]),
+     .s_axis_tkeep			(s_axis_tkeep[2*`IN_BYTE_COUNT-1:`IN_BYTE_COUNT]),
      .s_axis_tlast			(s_axis_tlast),
      .s_axis_tvalid			(s_axis_tvalid),
      .fft_go                (fft_go));

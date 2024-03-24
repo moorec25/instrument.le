@@ -6,7 +6,8 @@ module memory_mux (/*AUTOARG*/
    // Inputs
    clk, axis_rx, axis_tx, wmem_id, rmem_id, fft_raddra, fft_raddrb,
    fft_waddra, fft_waddrb, fft_wdataa, fft_wdatab, fft_wea, fft_web,
-   axis_s2mem_we, axis_s2mem_waddr, axis_s2mem_wdata,
+   axis_s2mem_wea, axis_s2mem_waddra, axis_s2mem_wdataa,
+   axis_s2mem_web, axis_s2mem_waddrb, axis_s2mem_wdatab,
    axis_mem2m_clken, axis_mem2m_raddr
    );
 
@@ -36,9 +37,13 @@ module memory_mux (/*AUTOARG*/
     input fft_wea;
     input fft_web;
 
-    input axis_s2mem_we;
-    input [`ADDR_WIDTH-1:0] axis_s2mem_waddr;
-    input [`DATA_WIDTH-1:0] axis_s2mem_wdata;
+    input axis_s2mem_wea;
+    input [`ADDR_WIDTH-1:0] axis_s2mem_waddra;
+    input [`DATA_WIDTH-1:0] axis_s2mem_wdataa;
+
+    input axis_s2mem_web;
+    input [`ADDR_WIDTH-1:0] axis_s2mem_waddrb;
+    input [`DATA_WIDTH-1:0] axis_s2mem_wdatab;
 
     input axis_mem2m_clken;
     input [`ADDR_WIDTH-1:0] axis_mem2m_raddr;
@@ -79,9 +84,12 @@ module memory_mux (/*AUTOARG*/
         mem0_dinb = {`DATA_WIDTH{1'b0}};
         mem0_web = 1'b0;
         if (axis_rx) begin
-            mem0_addra = axis_s2mem_waddr;
-            mem0_dina = axis_s2mem_wdata;
-            mem0_wea = axis_s2mem_we;
+            mem0_addra = axis_s2mem_waddra;
+            mem0_dina = axis_s2mem_wdataa;
+            mem0_wea = axis_s2mem_wea;
+            mem0_addrb = axis_s2mem_waddrb;
+            mem0_dinb = axis_s2mem_wdatab;
+            mem0_web = axis_s2mem_web;
             mem0_ena = 1'b1;
         end
         else if (axis_tx) begin

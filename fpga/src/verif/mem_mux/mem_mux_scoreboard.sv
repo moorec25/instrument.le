@@ -37,7 +37,7 @@ class mem_mux_scoreboard_t extends uvm_scoreboard;
             actual = trans_q.pop_front();
             if (actual.compare(expected)) begin
                 `uvm_info("mem_mux_scoreboard", $sformatf("Memory Write Transaction Expected Contents: %s", expected.sprint()), UVM_HIGH);
-                `uvm_info("mem_mux_scoreboard", "Write data matching", UVM_NONE)
+                `uvm_info("mem_mux_scoreboard", "Write data matching", UVM_HIGH)
             end else begin
                 `uvm_info("mem_mux_scoreboard", $sformatf("Memory Write Transaction Expected Contents: %s", expected.sprint()), UVM_NONE);
                 `uvm_info("mem_mux_scoreboard", $sformatf("Memory Write Transaction Actual Contents: %s", actual.sprint()), UVM_NONE);

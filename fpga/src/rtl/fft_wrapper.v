@@ -46,9 +46,12 @@ module fft_wrapper(/*AUTOARG*/
     wire [`ADDR_WIDTH-1:0] axis_mem2m_raddr;	// From axis_master of axis_bram_master.v
     wire [`DATA_WIDTH-1:0] axis_mem2m_rdata;	// From mem of memory_mux.v
     wire		axis_rx;		// From top_ctrl of fft_top_ctrl.v
-    wire [`ADDR_WIDTH-1:0] axis_s2mem_waddr;	// From axis_slave of axis_bram_slave.v
-    wire [`DATA_WIDTH-1:0] axis_s2mem_wdata;	// From axis_slave of axis_bram_slave.v
-    wire		axis_s2mem_we;		// From axis_slave of axis_bram_slave.v
+    wire [`ADDR_WIDTH-1:0] axis_s2mem_waddra;	// From axis_slave of axis_bram_slave.v
+    wire [`ADDR_WIDTH-1:0] axis_s2mem_waddrb;	// From axis_slave of axis_bram_slave.v
+    wire [`DATA_WIDTH-1:0] axis_s2mem_wdataa;	// From axis_slave of axis_bram_slave.v
+    wire [`DATA_WIDTH-1:0] axis_s2mem_wdatab;	// From axis_slave of axis_bram_slave.v
+    wire		axis_s2mem_wea;		// From axis_slave of axis_bram_slave.v
+    wire		axis_s2mem_web;		// From axis_slave of axis_bram_slave.v
     wire		axis_tx;		// From top_ctrl of fft_top_ctrl.v
     wire		fft_data_valid;		// From agu of address_gen.v
     wire [$clog2(`LEVELS)-1:0] fft_level;	// From top_ctrl of fft_top_ctrl.v
@@ -150,9 +153,12 @@ module fft_wrapper(/*AUTOARG*/
      .fft_wdatab			(fft_wdatab[`DATA_WIDTH-1:0]),
      .fft_wea				(fft_wea),
      .fft_web				(fft_web),
-     .axis_s2mem_we			(axis_s2mem_we),
-     .axis_s2mem_waddr			(axis_s2mem_waddr[`ADDR_WIDTH-1:0]),
-     .axis_s2mem_wdata			(axis_s2mem_wdata[`DATA_WIDTH-1:0]),
+     .axis_s2mem_wea			(axis_s2mem_wea),
+     .axis_s2mem_waddra			(axis_s2mem_waddra[`ADDR_WIDTH-1:0]),
+     .axis_s2mem_wdataa			(axis_s2mem_wdataa[`DATA_WIDTH-1:0]),
+     .axis_s2mem_web			(axis_s2mem_web),
+     .axis_s2mem_waddrb			(axis_s2mem_waddrb[`ADDR_WIDTH-1:0]),
+     .axis_s2mem_wdatab			(axis_s2mem_wdatab[`DATA_WIDTH-1:0]),
      .axis_mem2m_clken			(axis_mem2m_clken),
      .axis_mem2m_raddr			(axis_mem2m_raddr[`ADDR_WIDTH-1:0]));
 
@@ -194,9 +200,12 @@ module fft_wrapper(/*AUTOARG*/
     (/*AUTOINST*/
      // Outputs
      .axis_bram_slave_busy		(axis_bram_slave_busy),
-     .axis_s2mem_waddr			(axis_s2mem_waddr[`ADDR_WIDTH-1:0]),
-     .axis_s2mem_wdata			(axis_s2mem_wdata[`DATA_WIDTH-1:0]),
-     .axis_s2mem_we			(axis_s2mem_we),
+     .axis_s2mem_waddra			(axis_s2mem_waddra[`ADDR_WIDTH-1:0]),
+     .axis_s2mem_wdataa			(axis_s2mem_wdataa[`DATA_WIDTH-1:0]),
+     .axis_s2mem_wea			(axis_s2mem_wea),
+     .axis_s2mem_waddrb			(axis_s2mem_waddrb[`ADDR_WIDTH-1:0]),
+     .axis_s2mem_wdatab			(axis_s2mem_wdatab[`DATA_WIDTH-1:0]),
+     .axis_s2mem_web			(axis_s2mem_web),
      .axis_win2fft_tready		(axis_win2fft_tready),
      // Inputs
      .clk				(clk),

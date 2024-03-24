@@ -57,6 +57,8 @@ module sliding_window (/*AUTOARG*/
 
     reg overlap; // Status flag for when overlapping samples are being recirculated
 
+    reg last_sample;
+
     assign axis_win2fft_tlast = 1'b0;
     assign axis_win2fft_tkeep = {`IN_BYTE_COUNT{1'b1}};
     assign axis_win2fft_tdata = window_mult_q;
@@ -80,6 +82,7 @@ module sliding_window (/*AUTOARG*/
             reader_state_q <= IDLE;
             window_raddr_q <= 12'h000;
             overlap <= 1'b0;
+            last_sample <= 1'b0;
         end else begin
             case (reader_state_q)
                 IDLE: begin
@@ -103,7 +106,7 @@ module sliding_window (/*AUTOARG*/
 
                 SEND: begin
                     window_raddr_q <= axis_win2fft_tready ? window_raddr_q + 1'b1 : window_raddr_q;
-                    overlap <= window_raddr_q > 12'h3ff;
+                    overlap <= (window_raddr_q > 12'h3ff) & ~last_sample;
                     if (&window_raddr_q & axis_win2fft_tready) begin
                         reader_state_q <= FLUSH0;
                     end
@@ -129,6 +132,11 @@ module sliding_window (/*AUTOARG*/
                 end
 
             endcase
+            if (last_sample == 1'b1) begin
+                last_sample <= ~fifo_empty;
+            end else begin
+                last_sample <= s_axis_tlast;
+            end
         end
     end
 
