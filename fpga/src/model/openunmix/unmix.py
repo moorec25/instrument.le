@@ -133,3 +133,4 @@ if __name__ == "__main__":
 
     for file_name, is_similar in similarities.items():
         print(f"{file_name}: {'Similar' if is_similar else 'Not Similar'}") #rudimentary check
+        
