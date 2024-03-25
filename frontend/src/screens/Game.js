@@ -171,7 +171,7 @@ const Game = () => {
                 source={{ uri: metadata.album_art_url }}
                 style={styles.albumcover}
                 onLoadEnd={() => setLoading(false)}
-				blurRadius={3}
+				blurRadius={15-numGuesses*4}
             />
 			<View style={{flexDirection: 'row', width: '90%', height: 10, backgroundColor: '#FFF4E6'}}>
     			<View style={{flex: audioProgress, backgroundColor: '#BE9B7B'}} />
@@ -203,7 +203,7 @@ const Game = () => {
 				<Text style={styles.guessfont}>Submit Guess</Text>
 			</TouchableOpacity>
             {gameOver && <Text style={styles.textfont}>Game Over!</Text>}
-			{didWin && <Text>You Win!</Text>}
+			{didWin && <Text style={styles.textfont}>You Win!</Text>}
             
         </View>
 	);
