@@ -10,102 +10,107 @@ from pathlib import Path
 from model import OpenUnmix
 from model import Separator
 
-def load_spectrogram(filepath, device = "cpu"):
-    mixed_spectrogram = torch.load(filepath, map_location=device)
-    return mixed_spectrogram
+class Unmix:
 
-def process_spectrogram(spectrogram):
-    with torch.no_grad():
-        models = umxl_spec()
-        output_spectrograms = torch.zeros(spectrogram.shape + (len(models),), dtype=torch.float32)
-        for j, (model_name, model) in enumerate(models.items()):
-            target_spectrogram = model(spectrogram.detach().clone())
-            output_spectrograms[..., j] = target_spectrogram
-        return output_spectrograms
+    def __init__(self, device = "cpu"):
+        self.device = device
+        self.models = self.umxl_spec(device=self.device)
 
-def umxl_spec(targets=None, device="cpu", pretrained=True):
+    def load_spectrogram(self, filepath):
+        mixed_spectrogram = torch.load(filepath, map_location=self.device)
+        return mixed_spectrogram
 
-    target_urls = {
-        "bass": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/bass-2ca1ce51.pth",
-        "drums": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/drums-69e0ebd4.pth",
-        "other": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/other-c8c5b3e6.pth",
-        "vocals": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/vocals-bccbd9aa.pth",
-    }
+    def process_spectrogram(self, spectrogram):
+        with torch.no_grad():
+            output_spectrograms = torch.zeros(spectrogram.shape + (len(self.models),), dtype=torch.float32)
+            for j, (model_name, model) in enumerate(self.models.items()):
+                target_spectrogram = model(spectrogram.detach().clone())
+                output_spectrograms[..., j] = target_spectrogram
+            return output_spectrograms
 
-    if targets is None:
-        targets = ["vocals", "drums", "bass", "other"]
+    def umxl_spec(self, targets=None, device = "cpu", pretrained=True):
 
-    # determine the maximum bin count for a 16khz bandwidth model
-    max_bin = utils.bandwidth_to_max_bin(rate=44100.0, n_fft=4096, bandwidth=16000)
+        target_urls = {
+            "bass": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/bass-2ca1ce51.pth",
+            "drums": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/drums-69e0ebd4.pth",
+            "other": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/other-c8c5b3e6.pth",
+            "vocals": "https://zenodo.org/api/files/f8209c3e-ba60-48cf-8e79-71ae65beca61/vocals-bccbd9aa.pth",
+        }
 
-    target_models = {}
-    for target in targets:
-        # load open unmix model
-        target_unmix = OpenUnmix(
-            nb_bins=4096 // 2 + 1, nb_channels=2, hidden_size=1024, max_bin=max_bin
-        )
+        if targets is None:
+            targets = ["vocals", "drums", "bass", "other"]
 
-        # enable centering of stft to minimize reconstruction error
-        if pretrained:
-            state_dict = torch.hub.load_state_dict_from_url(
-                target_urls[target], map_location=device
+        # determine the maximum bin count for a 16khz bandwidth model
+        max_bin = utils.bandwidth_to_max_bin(rate=44100.0, n_fft=4096, bandwidth=16000)
+
+        target_models = {}
+        for target in targets:
+            # load open unmix model
+            target_unmix = OpenUnmix(
+                nb_bins=4096 // 2 + 1, nb_channels=2, hidden_size=1024, max_bin=max_bin
             )
-            target_unmix.load_state_dict(state_dict, strict=False)
-            target_unmix.eval()
 
-        target_unmix.to(device)
-        target_models[target] = target_unmix
-    return target_models
+            # enable centering of stft to minimize reconstruction error
+            if pretrained:
+                state_dict = torch.hub.load_state_dict_from_url(
+                    target_urls[target], map_location=self.device
+                )
+                target_unmix.load_state_dict(state_dict, strict=False)
+                target_unmix.eval()
 
-def get_outdir(test_name):
+            target_unmix.to(self.device)
+            target_models[target] = target_unmix
+        return target_models
 
-    out_home = os.environ.get("OUT_HOME")
-    outdir = out_home + "/" + test_name
+    def get_outdir(test_name):
 
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+        out_home = os.environ.get("OUT_HOME")
+        outdir = out_home + "/" + test_name
 
-    return outdir
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
 
-def amplitude_to_db(amplitude_tensor, ref=np.max):
-    amplitude_tensor = amplitude_tensor.numpy() if isinstance(amplitude_tensor, torch.Tensor) else amplitude_tensor
-    ref_value = ref(amplitude_tensor) if callable(ref) else ref
-    power_db = 20 * np.log10(np.maximum(1e-10, amplitude_tensor / ref_value))
-    return power_db
+        return outdir
 
-def plot_spectrogram(spectrogram, path, sr, ref=np.max, title='Spectrogram', ylabel='Frequency (Hz)', xlabel='Time (s)'):
-    plt.figure(figsize=(10, 4))
-    db_spec = amplitude_to_db(spectrogram, ref=ref)
-    plt.imshow(db_spec, aspect='auto', origin='lower', extent=[0, spectrogram.shape[1], 0, sr/2])
-    plt.colorbar(format='%+2.0f dB')
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xlabel(xlabel)
-    plt.tight_layout()
-    plt.savefig(get_outdir(path) + f"/{path}")
-    print(get_outdir("angels"))
-    #plt.show()
+    def amplitude_to_db(amplitude_tensor, ref=np.max):
+        amplitude_tensor = amplitude_tensor.numpy() if isinstance(amplitude_tensor, torch.Tensor) else amplitude_tensor
+        ref_value = ref(amplitude_tensor) if callable(ref) else ref
+        power_db = 20 * np.log10(np.maximum(1e-10, amplitude_tensor / ref_value))
+        return power_db
 
-def compare_tensor(spectrogram_tensor, output_directory):
+    def plot_spectrogram(spectrogram, path, sr, ref=np.max, title='Spectrogram', ylabel='Frequency (Hz)', xlabel='Time (s)'):
+        plt.figure(figsize=(10, 4))
+        db_spec = Unmix.amplitude_to_db(spectrogram, ref=ref)
+        plt.imshow(db_spec, aspect='auto', origin='lower', extent=[0, spectrogram.shape[1], 0, sr/2])
+        plt.colorbar(format='%+2.0f dB')
+        plt.title(title)
+        plt.ylabel(ylabel)
+        plt.xlabel(xlabel)
+        plt.tight_layout()
+        plt.savefig(Unmix.get_outdir(path) + f"/{path}")
+        print(Unmix.get_outdir("angels"))
+        #plt.show()
 
-    #output_tensor = output_tensor.squeeze()  # Remove batch dimension if present
-    similarities = {}
-    file_names = ["vocals.pt", "drums.pt", "bass.pt", "other.pt"]
+    def compare_tensor(spectrogram_tensor, output_directory):
 
-    for j, file_name in enumerate(file_names):
-        target_tensor = spectrogram_tensor[..., j]
-        file_path = os.path.join(output_directory, file_name)
-        # Load the audio file
-        files_name_tensor = torch.load(file_path)
-        print(f"{file_name} is\n", files_name_tensor)
-        print("target tensor is:\n", target_tensor)
-        
-        files_name_tensor = files_name_tensor.squeeze()  # Remove channel dimension if it's single channel
-        target_tensor = target_tensor.squeeze()
-        # Check the similarity
-        similarity = torch.equal(target_tensor, files_name_tensor)
-        similarities[file_name] = similarity
-    return similarities
+        #output_tensor = output_tensor.squeeze()  # Remove batch dimension if present
+        similarities = {}
+        file_names = ["vocals.pt", "drums.pt", "bass.pt", "other.pt"]
+
+        for j, file_name in enumerate(file_names):
+            target_tensor = spectrogram_tensor[..., j]
+            file_path = os.path.join(output_directory, file_name)
+            # Load the audio file
+            files_name_tensor = torch.load(file_path)
+            print(f"{file_name} is\n", files_name_tensor)
+            print("target tensor is:\n", target_tensor)
+            
+            files_name_tensor = files_name_tensor.squeeze()  # Remove channel dimension if it's single channel
+            target_tensor = target_tensor.squeeze()
+            # Check the similarity
+            similarity = torch.equal(target_tensor, files_name_tensor)
+            similarities[file_name] = similarity
+        return similarities
 
 if __name__ == "__main__":
     
@@ -114,8 +119,9 @@ if __name__ == "__main__":
     device = torch.device("cpu") #"cuda" if torch.cuda.is_available() else 
     file_path = os.environ.get("CAPSTONE_HOME") + "/out/angels/mix_spectrogram.pt" #Hardcoded path, should adjust to make modular
     
-    spectrogram = load_spectrogram(file_path, device=device)
-    output = process_spectrogram(spectrogram)
+    unmix_instance = Unmix()
+    spectrogram = unmix_instance.load_spectrogram(file_path)
+    output = unmix_instance.process_spectrogram(spectrogram)
 
     #plot_spectrogram(output[0, 0], path, sr=44100)
 
@@ -129,8 +135,7 @@ if __name__ == "__main__":
 
     print(output.shape)
 
-    similarities = compare_tensor(output, output_directory)
+    similarities = Unmix.compare_tensor(output, output_directory)
 
     for file_name, is_similar in similarities.items():
         print(f"{file_name}: {'Similar' if is_similar else 'Not Similar'}") #rudimentary check
-        
