@@ -111,7 +111,7 @@ class TorchSTFT(nn.Module):
             center=self.center,
             normalized=False,
             onesided=True,
-            pad_mode="reflect",
+            pad_mode="constant",
             return_complex=True,
         )
         stft_f = torch.view_as_real(complex_stft)

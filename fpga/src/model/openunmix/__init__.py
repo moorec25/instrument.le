@@ -5,7 +5,9 @@ Open-Unmix is a deep neural network reference implementation for music source se
 This is the python package API documentation. 
 Please checkout [the open-unmix website](https://sigsep.github.io/open-unmix) for more information.
 """
-import utils
+from openunmix import utils
+from .model import OpenUnmix
+from .model import Separator
 import torch.hub
 
 
@@ -15,7 +17,6 @@ def umxse_spec(targets=None, device="cpu", pretrained=True):
         "noise": "https://zenodo.org/api/files/765b45a3-c70d-48a6-936b-09a7989c349a/noise_04a6fc2d.pth",
     }
 
-    from model import OpenUnmix
 
     if targets is None:
         targets = ["speech", "noise"]
@@ -77,7 +78,6 @@ def umxse(
         Open-Unmix for Speech Enhancement (UMX SE).
         Zenodo. http://doi.org/10.5281/zenodo.3786908
     """
-    from model import Separator
 
     target_models = umxse_spec(targets=targets, device=device, pretrained=pretrained)
 
@@ -96,7 +96,6 @@ def umxse(
 
 
 def umxhq_spec(targets=None, device="cpu", pretrained=True):
-    from model import OpenUnmix
 
     # set urls for weights
     target_urls = {
@@ -160,7 +159,6 @@ def umxhq(
             for deployment.
     """
 
-    from model import Separator
 
     target_models = umxhq_spec(targets=targets, device=device, pretrained=pretrained)
 
@@ -179,7 +177,6 @@ def umxhq(
 
 
 def umx_spec(targets=None, device="cpu", pretrained=True):
-    from model import OpenUnmix
 
     # set urls for weights
     target_urls = {
@@ -244,7 +241,6 @@ def umx(
 
     """
 
-    from model import Separator
 
     target_models = umx_spec(targets=targets, device=device, pretrained=pretrained)
     separator = Separator(
@@ -262,7 +258,6 @@ def umx(
 
 
 def umxl_spec(targets=None, device="cpu", pretrained=True):
-    from model import OpenUnmix
 
     # set urls for weights
     target_urls = {
@@ -329,7 +324,6 @@ def umxl(
 
     """
 
-    from model import Separator
 
     target_models = umxl_spec(targets=targets, device=device, pretrained=pretrained)
     separator = Separator(
