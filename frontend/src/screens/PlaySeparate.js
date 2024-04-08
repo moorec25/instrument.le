@@ -112,7 +112,7 @@ const PlaySeparate = () => {
   
   return (
     <View style={styles.container}>
-      <View style={styles.titlecontainer}><Text style={styles.titlefont}>Song Title</Text></View>
+      <View style={styles.titlecontainer}><Text style={styles.titlefont}>Crazy On You Heart</Text></View>
       <View style={styles.tracklistcontainer}>
         <View style={styles.trackcontainer}><Text style={styles.trackfont}>Vocals</Text></View>
         <View style={styles.trackcontainer}><Text style={styles.trackfont}>Bass</Text></View>

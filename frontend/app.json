@@ -15,7 +15,10 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Face ID is used to authenticate the user"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +30,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow instrument.le to use Face ID."
+        }
+      ]
     ]
   }
 }

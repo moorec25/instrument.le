@@ -52,7 +52,7 @@ const FindSeparate = () => {
             if (fileRes) {
                 // TODO: Get the unique ID of this device
                 // If the file was uploaded successfully, upload the metadata
-                const metaRes = await aws.uploadMetadataToDb(res.key, songName, albumName, genre, artistName, releaseYear);
+                const metaRes = await aws.uploadMetadataToDb(res.key, userID, songName, albumName, genre, artistName, releaseYear);
                 // Check if the metadata was uploaded successfully
                 if (metaRes) {
                     Alert.alert('Success', 'File uploaded successfully');

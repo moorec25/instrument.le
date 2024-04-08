@@ -63,9 +63,9 @@ export async function uploadFileToS3(presignedUrl, blob) {
     }
 }
 
-export async function uploadMetadataToDb(s3Key, title, album, genre, artist, year) {
+export async function uploadMetadataToDb(s3Key, user_id, title, album, genre, artist, year) {
     // Put the body into the format expected by the AWS Lambda function (uploadFileWithMetadata)
-    let body = JSON.stringify({ metadata_id: s3Key, user_id: "GuestUser", title, album, genre, artist, year });
+    let body = JSON.stringify({ metadata_id: s3Key, user_id, title, album, genre, artist, year });
     // Print message to console
     console.log(`Uploading metadata to database with body: ${body}`);
     try {

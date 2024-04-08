@@ -8,7 +8,9 @@ import Game from './src/screens/Game';
 import ChooseSong from './src/screens/ChooseSong';
 import PlaySeparate from './src/screens/PlaySeparate';
 import FindSeparate from './src/screens/FindSeparate';
+import Auth from './src/screens/Auth';
 import { Button } from 'react-native';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -26,11 +28,12 @@ const App = () => {
     	    )
     	    })}
     	>
-    	  <Stack.Screen name="Home" component={Home} />
+    	  <Stack.Screen name="Home" component={Home} options={{ headerLeft: () => null, headerShown: false }} />
     	  <Stack.Screen name="Game" component={Game} />
     	  <Stack.Screen name="ChooseSong" component={ChooseSong} />
     	  <Stack.Screen name="PlaySeparate" component={PlaySeparate} />
     	  <Stack.Screen name="FindSeparate" component={FindSeparate} />
+		  <Stack.Screen name="Auth" component={Auth} />
     	</Stack.Navigator>
     </NavigationContainer>
   );

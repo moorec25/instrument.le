@@ -4,6 +4,8 @@ import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as Animatable from 'react-native-animatable';
 import { AWS_API_KEY, GET_GAME_START_METADATA_URL } from '@env';
+import { LoadingScreen } from './LoadingScreen';
+import { Alert } from 'react-native';
 
 const Game = () => {
 
@@ -19,7 +21,8 @@ const Game = () => {
 	const [soundUrls, setSoundUrls] = useState([]);
 
 	// Other state variables
-	const [loading, setLoading] = useState(true);
+	const [timeLoading, setTimeLoading] = useState(true);
+	const [metadataLoading, setMetadataLoading] = useState(true);
 	const [gameOver, setGameOver] = useState(false);
 	const [didWin, setDidWin] = useState(false);
 	const [numGuesses, setNumGuesses] = useState(0);
@@ -32,9 +35,10 @@ const Game = () => {
 
 	// Load the audio files from the server
 	useEffect(() => {
-		
+		// Get the game metadata
 		fetchAudioAndMetadata();
-
+		// After 2 seconds set timeLoading to false
+		setTimeout(() => setTimeLoading(false), 2000);
 	}, []);
 
 	const fetchAudioAndMetadata = async () => {
@@ -57,7 +61,8 @@ const Game = () => {
 			// Enable a hint for the year
 			setHintYear(true);
 			// Set loading to false
-			// TODO: Set loading false
+			setMetadataLoading(false);
+			// Debug message
 			console.log(`Metadata retrieved successfully.`)
 		}
 		catch (err) {
@@ -133,6 +138,8 @@ const Game = () => {
 			setDidWin(true);
 			// Set game over to true
 			setGameOver(true);
+			// Give alert to tell user they won
+			Alert.alert('You Win!', 'Congratulations! You have guessed the song correctly.');
 		}
 		else {
 			// Debug console
@@ -158,19 +165,24 @@ const Game = () => {
 			else if (numGuesses >= 3) {
 				// Set game over to true
 				setGameOver(true);
+				// Give alert to tell user they lost
+				Alert.alert('Game Over', 'You have run out of guesses. Please try again.');
 			}
 			// Increment the number of guesses
 			setNumGuesses(numGuesses + 1);
 		}
 	};
 
+	// If the metadata is still loading, show loading screen
+	if (timeLoading || metadataLoading) {
+		return <LoadingScreen />;		
+	}
+
 	return (
 		<View style={styles.container}>
-			{loading && <ActivityIndicator size="large" color="#0000ff" />}
 			<Image
                 source={{ uri: metadata.album_art_url }}
                 style={styles.albumcover}
-                onLoadEnd={() => setLoading(false)}
 				blurRadius={15-numGuesses*4}
             />
 			<View style={{flexDirection: 'row', width: '90%', height: 10, backgroundColor: '#FFF4E6'}}>
@@ -202,8 +214,6 @@ const Game = () => {
             <TouchableOpacity style={styles.guessbox} onPress={handleGuessSubmit} >
 				<Text style={styles.guessfont}>Submit Guess</Text>
 			</TouchableOpacity>
-            {gameOver && <Text style={styles.textfont}>Game Over!</Text>}
-			{didWin && <Text style={styles.textfont}>You Win!</Text>}
             
         </View>
 	);
@@ -220,6 +230,7 @@ const styles = StyleSheet.create({
         width: 300,
         height: 300,
         marginBottom: 25,
+		borderRadius: 25,
     },
 	playstopbutton: {
         width: 50,

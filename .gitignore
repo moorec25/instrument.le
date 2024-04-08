@@ -5,4 +5,4 @@ out/
 .vscode/
 *vivado*
 node_modules/
-
+.env
