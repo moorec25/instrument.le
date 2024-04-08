@@ -26,7 +26,7 @@ const App = () => {
     	    )
     	    })}
     	>
-    	  <Stack.Screen name="Home" component={Home} />
+    	  <Stack.Screen name="Home" component={Home} options={{ headerLeft: () => null, headerShown: false }} />
     	  <Stack.Screen name="Game" component={Game} />
     	  <Stack.Screen name="ChooseSong" component={ChooseSong} />
     	  <Stack.Screen name="PlaySeparate" component={PlaySeparate} />

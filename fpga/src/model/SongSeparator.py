@@ -30,7 +30,8 @@ class SongSeparator:
         Returns a list of absolute file paths to the separated tracks.
         Returns bass, drums, vocals, other, 2layer, 3layer
         """
-
+        print(f"Separating song {file_path}...")
+        
         audio, Fs = data.load_audio(file_path)
         audio = utils.preprocess(audio, Fs, self.separator.sample_rate)
         estimates = self.separator(audio)
@@ -50,6 +51,8 @@ class SongSeparator:
                 torch.squeeze(estimate).detach().to("cpu"),
                 sample_rate=self.separator.sample_rate,
             )
+
+        print("Song separated successfully.")
 
         return paths
 

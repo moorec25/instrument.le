@@ -1,28 +1,44 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { BackHandler, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 
 // Map of buttons to the screen they navigate to
 const screenMap = {
-    'Play':     'Game',
-    'Separate': 'FindSeparate',
-    'Listen':   'ChooseSong'
+    'Play 🎶':     'Game',
+    'Listen 🎧':   'ChooseSong',
+    'Separate ⚙️': 'FindSeparate',
 }
+
+// Get the screen width
+const screenWidth = Dimensions.get('window').width;
+
+// Print screen width to console
+console.log(`Screen is ${screenWidth}`);
 
 const Home = ({ navigation }) => {
 
     // Function to handle navigation to different screens
     const handleClick = (screen) => navigation.navigate(screen);
 
+    // Handle back presses on the home screen by exiting the app
+    useEffect(() => {
+        // Add the event listener to exit the app on a hardware back press
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", BackHandler.exitApp);
+        // Cleanup function to remove event listener after app exits
+        return () => backHandler.remove();
+      }, []);
+
     return (
         <View style={styles.container}>
-            <View style={[styles.logo, styles.shadowProp]}>
-                <Text style={styles.textlogo}>instrument.le</Text>
+            <View style={ [styles.logo, styles.shadowProp] }>
+                <Text style={ styles.textlogo } numberOfLines={ 1 }>
+                    instrument.le
+                </Text>
             </View>
             <View>
                 {
                     Object.keys(screenMap).map((button, index) => (
                         // Create a button for each item in the screenMap, mapped to the navigation function
-                        <TouchableOpacity style={[styles.button, styles.shadowProp]} key = {index} onPress = {() => handleClick(screenMap[button])}>
+                        <TouchableOpacity style={ [styles.button, styles.shadowProp] } key={ index } onPress = {() => handleClick(screenMap[button])}>
                             <Text style={styles.textbutton}>{button}</Text>
                         </TouchableOpacity>
                     ))
@@ -73,7 +89,8 @@ const styles = StyleSheet.create({
     textlogo: {
         color: '#3C2F2F',
         textAlign: 'center',
-        fontSize: 45,
+        fontSize: screenWidth / 9,
+        flexShrink: 0,
     },
     shadowProp: {
         shadowColor: '#171717',

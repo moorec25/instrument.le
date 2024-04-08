@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const screenMap = {
   'Add New': 'FindSeparate',
-  'Separate': 'PlaySeparate',
+  'Crazy On You': 'PlaySeparate',
 }
 
 

@@ -1,0 +1,32 @@
+<svg xml:space="preserve" viewBox="0 0 100 100" y="0" x="0" xmlns="http://www.w3.org/2000/svg" id="Layer_1" version="1.1" style="height: 100%; width: 100%; background: rgba(0, 0, 0, 0); shape-rendering: auto;" width="200px" height="200px">
+  <style>
+    @keyframes ld-beat {
+      0% {
+        animation-timing-function: cubic-bezier(0.1028, 0.2484, 0.1372, 0.849);
+        transform: scale(1);
+      }
+      34% {
+        animation-timing-function: cubic-bezier(0.7116, 0.2095, 0.8159, 0.6876);
+        transform: scale(1.2);
+      }
+      68% {
+        animation-timing-function: cubic-bezier(0.1475, 0.2888, 0.294, 0.883);
+        transform: scale(1.0268);
+      }
+      84% {
+        animation-timing-function: cubic-bezier(0.8176, 0.2193, 0.867, 0.6889);
+        transform: scale(1.0932);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .ld.ld-beat {
+      animation: ld-beat 1s infinite linear;
+    }
+  </style>
+  <g class="ld ldl-scale ld-beat" style="transform-origin: 50% 50%; transform: rotate(0deg) scale(0.8, 0.8);">
+    <g class="ldl-ani" style="transform: scale(1); transform-origin: 50px 50px; animation: 1.11111s linear 0s infinite normal forwards running beat-a8dc7c36-b4de-42c9-a34e-c24580f9a7aa;"><g class="ldl-layer"><g class="ldl-ani" style="transform-origin: 50px 50px;"><ellipse fill="#323232" ry="16.428" rx="19.343" cy="75.645" cx="40.307" transform="rotate(-21.283 40.302 75.636)" style="fill: rgb(255, 244, 230);"></ellipse></g></g><g class="ldl-layer"><g class="ldl-ani" style="transform-origin: 50px 50px;"><path d="M48.779 7.51h10.256v63.554H48.779z" fill="#323232" style="fill: rgb(255, 244, 230);"></path></g></g><g class="ldl-layer"><g class="ldl-ani" style="transform-origin: 50px 50px;"><path fill="#323232" d="M60.593 7.49c-.201 1.579-.01 3.419.576 5.297.58 1.888 1.512 3.724 2.783 5.647 1.26 1.915 2.834 3.879 4.436 6.038a93.375 93.375 0 0 1 4.478 6.631c1.373 2.274 2.713 4.502 3.888 7.107 1.164 2.559 1.909 5.535 1.926 8.364a21.478 21.478 0 0 1-1.466 8.18c-.999 2.555-2.57 4.956-4.789 6.613l-.966-1.126c1.622-1.737 2.588-3.994 3.047-6.308a17.97 17.97 0 0 0 .018-6.959c-.437-2.261-1.329-4.23-2.627-6.138-1.277-1.876-2.929-3.802-4.555-5.653a85.697 85.697 0 0 0-5.124-5.289c-1.766-1.675-3.738-3.39-5.693-5.441-3.916-4.085-7.16-9.854-7.747-16.943l11.815-.02z" style="fill: rgb(255, 244, 230);"></path></g></g><metadata xmlns:d="https://loading.io/stock/"><d:name>music note</d:name><d:tags>music note,eighth notes,score,midi</d:tags><d:license>by</d:license><d:slug>rp4ne3</d:slug></metadata></g>
+  </g>
+</svg>
