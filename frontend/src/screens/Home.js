@@ -4,8 +4,8 @@ import { Animated, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions }
 // Map of buttons to the screen they navigate to
 const screenMap = {
     'Play 🎶':     'Game',
-    'Listen ⚙️':   'Auth',
-    'Separate 🎧': 'FindSeparate'
+    'Listen 🎧':   'Auth',
+    'Separate ⚙️': 'FindSeparate'
 }
 
 // Get the screen width
