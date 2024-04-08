@@ -227,6 +227,10 @@ const styles = StyleSheet.create({
         padding: 10,
         paddingHorizontal: 15,
         marginTop: 1,
+    },
+    buttonopaque:{
+        alignItems: 'center',
+		backgroundColor: '#BE9B7B',
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         borderBottomLeftRadius: 10,
