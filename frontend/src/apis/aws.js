@@ -92,3 +92,35 @@ export async function uploadMetadataToDb(s3Key, user_id, title, album, genre, ar
         return null;
     }
 }
+
+export async function getUserSongs(user_id) {
+    // Put the body into the format expected by the AWS Lambda function (getUserSongs)
+    let body = JSON.stringify({ user_id });
+    // Print message to console
+    console.log(`Getting user songs with body: ${body}`);
+    try {
+        // Make a POST request to the API
+        const response = await fetch(GET_USER_SONGS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': AWS_API_KEY
+            },
+            body: body
+        });
+        // If the status code is not 200, throw an error
+        if (response.status !== 200) throw new Error(json.message || "Failed to get user songs");
+        // Get the JSON response
+        let json = await response.json();
+        // Return the songs
+        return json;
+    }
+    catch (err) {
+        // Log the error to the console
+        console.error(err);
+        // Show an alert to the user with an error message
+        Alert.alert('Error', `Failed to get user songs. Reason: ${err}`);
+        // Return null to indicate an error occurred
+        return null;
+    }
+}
