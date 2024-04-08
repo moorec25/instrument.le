@@ -1,5 +1,6 @@
-import React, {useRef, useEffect} from 'react';
-import { BackHandler, Animated, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { BackHandler, Animated, View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
+import * as SecureStore from "expo-secure-store";
 
 // Map of buttons to the screen they navigate to
 const screenMap = {
@@ -15,7 +16,9 @@ const screenWidth = Dimensions.get('window').width;
 console.log(`Screen is ${screenWidth}`);
 
 const FadeInView = props => {
-    const fadeAnim = useRef(new Animated.Value(0)).current; // Initial value for opacity: 0
+
+    // Use the useRef hook to create a fadeAnim variable
+    const fadeAnim = useRef(new Animated.Value(0)).current;
   
     useEffect(() => {
       Animated.timing(fadeAnim, {
@@ -26,10 +29,10 @@ const FadeInView = props => {
     }, [fadeAnim]);
   
     return (
-      <Animated.View // Special animatable View
+      <Animated.View
         style={{
           ...props.style,
-          opacity: fadeAnim, // Bind opacity to animated value
+          opacity: fadeAnim,
         }}>
         {props.children}
       </Animated.View>
@@ -38,9 +41,10 @@ const FadeInView = props => {
   
 
 const Home = ({ navigation }) => {
-
     // Function to handle navigation to different screens
     const handleClick = (screen) => navigation.navigate(screen);
+    // If the user clicks the logo 10 times, they become an admin
+    const [numClick, setNumClick] = useState(0);
 
     // Handle back presses on the home screen by exiting the app
     useEffect(() => {
@@ -48,13 +52,27 @@ const Home = ({ navigation }) => {
         const backHandler = BackHandler.addEventListener("hardwareBackPress", BackHandler.exitApp);
         // Cleanup function to remove event listener after app exits
         return () => backHandler.remove();
-      }, []);
+    }, []);
+
+    // Hacky function to let user change their ID :hehe:
+    const adminHack = () => {
+        setNumClick(numClick + 1);
+        // If the user clicks the logo 10 times, their ID is set to "Admin"
+        if (numClick >= 25) {
+            // Alert the user that they are now an admin
+            Alert.alert('Admin Hack', 'Your userId has been set to `Admin`');
+            // Store the UUID in SecureStore
+            SecureStore.setItem("userID", "Admin");
+        }
+    }
 
     return (
         <FadeInView style={styles.container}>
-            <View style={[styles.logo, styles.shadowProp]}>
-                <Text style={styles.textlogo}>instrument.le</Text>
-            </View>
+            <TouchableOpacity onPress={adminHack} activeOpacity={1}>
+                <View style={[styles.logo, styles.shadowProp]}>
+                    <Text style={styles.textlogo}>instrument.le</Text>
+                </View>
+            </TouchableOpacity>
             <View>
                 {
                     Object.keys(screenMap).map((button, index) => (
