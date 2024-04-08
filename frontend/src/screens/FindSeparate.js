@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, View, Text, TextInput , Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { Animated, Button, View, Text, TextInput , Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Device from 'expo-device';
 import * as aws from '../apis/aws';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as SecureStore from "expo-secure-store";
 
 const FindSeparate = () => {
 
@@ -18,6 +20,40 @@ const FindSeparate = () => {
     const [albumName, setAlbumName] = useState('');
     const [releaseYear, setReleaseYear] = useState('');
     const [genre, setGenre] = useState('');
+    const [isLoading, setLoading] = useState(false);
+    const [isFilled, setFilled] = useState(false);
+    const[isBiometricSupported, setIsBiometricSupported] = useState(false);
+    const[isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userID, setUserID] = useState();
+
+    useEffect(() => {
+        (async () => {
+            const compatible = await LocalAuthentication.hasHardwareAsync();
+            setIsBiometricSupported(compatible);
+        })();
+    });
+
+    function onAuthenticate () {
+        const auth = LocalAuthentication.authenticateAsync({
+          promptMessage: 'Authenticate',
+          fallbackLabel: 'Enter Password',
+        });
+        auth.then(result => {
+          setIsAuthenticated(result.success);
+          if (SecureStore.getItem("userID") == undefined){
+            SecureStore.setItem("userID", (Date.now()*(Math.random())).toString());
+            setUserID(SecureStore.getItem("userID"));
+            SecureStore.ALWAYS_THIS_DEVICE_ONLY = true;
+          }
+          else{
+            setUserID(SecureStore.getItem("userID"));
+          }
+            console.log(result.success);
+            console.log(SecureStore.getItem("userID"));
+        });
+      }
+
+
 
     const selectFile = async () => {
         try {
@@ -48,6 +84,8 @@ const FindSeparate = () => {
         if (res && res.url) {
             // Upload the file to S3
             const fileRes = await aws.uploadFileToS3(res.url, file);
+
+            setLoading(true);
             // Check if the file was uploaded successfully
             if (fileRes) {
                 // TODO: Get the unique ID of this device
@@ -59,62 +97,113 @@ const FindSeparate = () => {
                 }
                 else {
                     Alert.alert('Error', 'Failed to upload metadata. Please try again.');
+                    setSongName('');
+                    setArtistName('');
+                    setAlbumName('');
+                    setReleaseYear('');
+                    setGenre('');
+                    setLoading(false);
                 }
             }
             else {
                 Alert.alert('Error', 'Failed to upload file. Please try again.');
+                setSongName('');
+                setArtistName('');
+                setAlbumName('');
+                setReleaseYear('');
+                setGenre('');
+                setLoading(false);
             }
         }
     }
 
     return (
         <View style={styles.container}>
-            <TextInput
-                placeholder="Song Name"
-                value={songName}
-                onChangeText={setSongName}
-                placeholderTextColor= '#4B3832'
-                style={styles.input}
-            />
-            <TextInput
-                placeholder="Artist Name"
-                value={artistName}
-                onChangeText={setArtistName}
-                placeholderTextColor= '#4B3832'
-                style={styles.input}
-            />
-            <TextInput
-                placeholder="Album Name"
-                value={albumName}
-                onChangeText={setAlbumName}
-                placeholderTextColor= '#4B3832'
-                style={styles.input}
-            />
-            <TextInput
-                placeholder="Release Year"
-                value={releaseYear}
-                onChangeText={setReleaseYear}
-                keyboardType="numeric"
-                placeholderTextColor= '#4B3832'
-                style={styles.input}
-            />
-            <TextInput
-                placeholder="Genre"
-                value={genre}
-                onChangeText={setGenre}
-                placeholderTextColor= '#4B3832'
-                style={styles.input}
-            />
-            <View style={styles.filecontainer}>
-                <TouchableOpacity style={styles.button} onPress={selectFile}>
-                    <Text style={styles.textfont}>Select File</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={uploadFile} disabled={!file || !songName || !artistName || !albumName || !releaseYear || !genre}>
-                    <Text style={styles.textfont}>Upload File</Text>
+            { isAuthenticated
+            ?
+            <View style={styles.inputcontainer}>
+                <TextInput
+                    placeholder="Song Name"
+                    value={songName}
+                    onChangeText={setSongName}
+                    onChange={setFilled}
+                    placeholderTextColor= '#4B3832'
+                    style={styles.input}
+                />
+                <TextInput
+                    placeholder="Artist Name"
+                    value={artistName}
+                    onChangeText={setArtistName}
+                    onChange={setFilled}
+                    placeholderTextColor= '#4B3832'
+                    style={styles.input}
+                />
+                <TextInput
+                    placeholder="Album Name"
+                    value={albumName}
+                    onChangeText={setAlbumName}
+                    onChange={setFilled}
+                    placeholderTextColor= '#4B3832'
+                    style={styles.input}
+                />
+                <TextInput
+                    placeholder="Release Year"
+                    value={releaseYear}
+                    onChangeText={setReleaseYear}
+                    onChange={setFilled}
+                    keyboardType="numeric"
+                    placeholderTextColor= '#4B3832'
+                    style={styles.input}
+                />
+                <TextInput
+                    placeholder="Genre"
+                    value={genre}
+                    onChangeText={setGenre}
+                    onChange={setFilled}
+                    placeholderTextColor= '#4B3832'
+                    style={styles.input}
+                />
+                <View>
+                    { isLoading
+                    ?
+                    <View style={styles.filecontainer}>
+                        <Text>Loading</Text>
+                    </View>
+                    :
+                    <View>
+                        { isFilled
+                        ?
+                        <View style={styles.filecontainer}>
+                            <TouchableOpacity style={styles.button} onPress={selectFile}>
+                                <Text style={styles.textfont}>Select File</Text>
+                            </TouchableOpacity>
+                            <View style={styles.buttonopaque}>
+                                <Text style={styles.textfont}>Upload File</Text>
+                            </View>
+                        </View>
+                        :
+                        <View style={styles.filecontainer}>
+                            <TouchableOpacity style={styles.button} onPress={selectFile}>
+                                <Text style={styles.textfont}>Select File</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={uploadFile} disabled={!file || !songName || !artistName || !albumName || !releaseYear || !genre}>
+                                <Text style={styles.textfont}>Upload File</Text>
+                            </TouchableOpacity>
+                        </View>
+                        }
+                    </View>
+                    } 
+                </View>
+            </View>
+            :
+            <View>
+                <TouchableOpacity style={styles.button} onPress = {onAuthenticate}>
+                    <Text style={styles.textfont}>Login</Text>
                 </TouchableOpacity>
             </View>
+            }
         </View>
-    )
+    )   
 };
 
 
@@ -125,6 +214,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 		backgroundColor: '#BE9B7B'
     },
+    inputcontainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     filecontainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -134,8 +228,9 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#4B3832',
         height: 40,
-        width: '80%',
+        width: '90%',
         padding: 10,
+        paddingHorizontal: 105,
         marginBottom: 12,
     },
     textfont:{
@@ -155,7 +250,22 @@ const styles = StyleSheet.create({
 		padding: 10,
 		marginTop: 5,
         marginHorizontal: 15,
+    },
+
+    buttonopaque:{
+        alignItems: 'center',
+		backgroundColor: '#BE9B7B',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 2,
+		borderColor: '#FFF4E6',
+		padding: 10,
+		marginTop: 5,
+        marginHorizontal: 15,
     }
+
 });
 
 export default FindSeparate;
