@@ -1,5 +1,5 @@
 import React, {useRef, useEffect} from 'react';
-import { Animated, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import { BackHandler, Animated, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 
 // Map of buttons to the screen they navigate to
 const screenMap = {
