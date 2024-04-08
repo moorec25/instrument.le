@@ -34,8 +34,10 @@ export const handler = async (event) => {
         const drumKey = queryResult.Items[randomIndex].s3_drums_key;
         const vocalKey = queryResult.Items[randomIndex].s3_vocals_key;
         const otherKey = queryResult.Items[randomIndex].s3_other_key;
+        const layer2Key = queryResult.Items[randomIndex].s3_2layer_key;
+        const layer3Key = queryResult.Items[randomIndex].s3_3layer_key;
         // Guard clause in case any key is not present 
-        if (!fullKey || !bassKey || !drumKey || !vocalKey || !otherKey) {
+        if (!fullKey || !bassKey || !drumKey || !vocalKey || !otherKey || !layer2Key || !layer3Key) {
             return {
                 statusCode: 200,
                 body: JSON.stringify({ message: "One or more keys missing" }),
@@ -52,16 +54,20 @@ export const handler = async (event) => {
         const drumCommand = new GetObjectCommand({ Bucket: bucket, Key: drumKey });
         const vocalCommand = new GetObjectCommand({ Bucket: bucket, Key: vocalKey });
         const otherCommand = new GetObjectCommand({ Bucket: bucket, Key: otherKey });
+        const layer2Command = new GetObjectCommand({ Bucket: bucket, Key: layer2Key });
+        const layer3Command = new GetObjectCommand({ Bucket: bucket, Key: layer3Key });
         // Get a presigned URL for each key
-        let [full_url, bass_url, drum_url, vocal_url, other_url] = await Promise.all([
+        let [full_url, bass_url, drum_url, vocal_url, other_url, layer2_url, layer3_url] = await Promise.all([
             getSignedUrl(s3Client, fullCommand, { expiresIn: 3600 }),
             getSignedUrl(s3Client, bassCommand, { expiresIn: 3600 }),
             getSignedUrl(s3Client, drumCommand, { expiresIn: 3600 }),
             getSignedUrl(s3Client, vocalCommand, { expiresIn: 3600 }),
             getSignedUrl(s3Client, otherCommand, { expiresIn: 3600 }),
+            getSignedUrl(s3Client, layer2Command, { expiresIn: 3600 }),
+            getSignedUrl(s3Client, layer3Command, { expiresIn: 3600 }),
         ]);
         // Create an object to attach to the response
-        const urlObj = { full_url, bass_url, drum_url, vocal_url, other_url };
+        const urlObj = { full_url, bass_url, drum_url, vocal_url, other_url, layer2_url, layer3_url};
         // Attach to the object at the random index
         queryResult.Items[randomIndex].urls = urlObj;
         // Return the object

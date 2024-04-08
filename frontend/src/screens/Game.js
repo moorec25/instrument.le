@@ -53,20 +53,31 @@ const Game = () => {
 			});
 			// Get the metadata of the game
 			const metadata = await response.json();
-			// TODO: Error handling for when there are no songs available
-			// Set metadata state variable
-			setMetadata(metadata);
-			// Set the sound URLs (only drums for the first round)
-			setSoundUrls([metadata.urls.drum_url]);
-			// Enable a hint for the year
-			setHintYear(true);
-			// Set loading to false
-			setMetadataLoading(false);
-			// Debug message
-			console.log(`Metadata retrieved successfully.`)
+			// If there is no metadata, there is no songs available for the game
+			if (!metadata.urls) {
+				// Give alert to tell user they won
+				Alert.alert('Error', 'There are no songs available for the game. Please try again later.');
+				// Debug message
+				console.error('No metadata found for the game.');
+			}
+			else {
+				// Set metadata state variable
+				setMetadata(metadata);
+				// Set the sound URLs (only drums for the first round)
+				setSoundUrls([metadata.urls.drum_url]);
+				// Enable a hint for the year
+				setHintYear(true);
+				// Set loading to false
+				setMetadataLoading(false);
+				// Debug message
+				console.log(`Metadata retrieved successfully.`);
+			}
 		}
 		catch (err) {
-			console.log(err);
+			// Give alert to tell user they won
+			Alert.alert('Error', 'There was an error loading the game, please try again...');
+			// Debug print
+			console.error(err);
 		}
 	}
 

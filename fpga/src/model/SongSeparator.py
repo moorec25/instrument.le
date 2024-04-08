@@ -5,23 +5,29 @@ from pathlib import Path
 import torch.hub
 import os
 import torchaudio
+from dotenv import dotenv_values
 
+config = dotenv_values(".env")
 
 class SongSeparator:
 
     def __init__(self) -> None:
         self.targets = ["vocals", "drums", "bass", "other"]
-        self.separator = openunmix.umxl(self.targets)
         self.outdir = self.get_outdir()
+        self.separator = openunmix.umxl(self.targets)
 
     def get_outdir(self) -> str:
-
-        out_home = os.environ.get("OUT_HOME")
+        # Load OUT_HOME from environment
+        out_home = config["OUT_HOME"]
+        # Assert this variable is set
+        assert out_home is not None
+        # Set os environment variable
+        os.environ["OUT_HOME"] = out_home
+        # Directory for output
         outdir = out_home + "/app"
-
+        # Create the directory if it does not exist
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-
         return outdir
 
     def separate_song(self, file_path: str, for_game: bool = False) -> list:

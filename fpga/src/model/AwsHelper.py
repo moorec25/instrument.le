@@ -32,12 +32,12 @@ class AwsHelper:
             # Get the file name from the S3 key
             file_name = s3_key.split('/')[-1]
             # Write the file to the local directory
-            with open(file_name, 'wb') as file:
+            with open(f"./full_songs/{file_name}", 'wb') as file:
                 file.write(response.content)
             # Print message to console
             print(f"Downloaded file {file_name} from S3")
             # Return the absolute path of the local file
-            return os.path.abspath(file_name)
+            return os.path.abspath(f"./full_songs/{file_name}")
         # Otherwise the request failed
         return None
     

@@ -6,3 +6,4 @@ out/
 *vivado*
 node_modules/
 .env
+full_songs/
