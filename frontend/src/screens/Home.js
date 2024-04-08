@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
-import { BackHandler, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import React, {useRef, useEffect} from 'react';
+import { BackHandler, Animated, View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 
 // Map of buttons to the screen they navigate to
 const screenMap = {
     'Play 🎶':     'Game',
-    'Listen 🎧':   'ChooseSong',
-    'Separate ⚙️': 'FindSeparate',
+    'Listen 🎧':   'Auth',
+    'Separate ⚙️': 'FindSeparate'
 }
 
 // Get the screen width
@@ -13,6 +13,29 @@ const screenWidth = Dimensions.get('window').width;
 
 // Print screen width to console
 console.log(`Screen is ${screenWidth}`);
+
+const FadeInView = props => {
+    const fadeAnim = useRef(new Animated.Value(0)).current; // Initial value for opacity: 0
+  
+    useEffect(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 3000,
+        useNativeDriver: true,
+      }).start();
+    }, [fadeAnim]);
+  
+    return (
+      <Animated.View // Special animatable View
+        style={{
+          ...props.style,
+          opacity: fadeAnim, // Bind opacity to animated value
+        }}>
+        {props.children}
+      </Animated.View>
+    );
+};
+  
 
 const Home = ({ navigation }) => {
 
@@ -28,11 +51,9 @@ const Home = ({ navigation }) => {
       }, []);
 
     return (
-        <View style={styles.container}>
-            <View style={ [styles.logo, styles.shadowProp] }>
-                <Text style={ styles.textlogo } numberOfLines={ 1 }>
-                    instrument.le
-                </Text>
+        <FadeInView style={styles.container}>
+            <View style={[styles.logo, styles.shadowProp]}>
+                <Text style={styles.textlogo}>instrument.le</Text>
             </View>
             <View>
                 {
@@ -44,7 +65,7 @@ const Home = ({ navigation }) => {
                     ))
                 }
             </View>
-        </View>
+        </FadeInView>
     );
 }
 

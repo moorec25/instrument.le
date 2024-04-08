@@ -8,7 +8,7 @@ const screenMap = {
 
 
 
-const ChooseSong = ({ navigation }) => {
+const ChooseSong = ({setIsAuthenticated}) => {
 
   const handleClick = (screen) => navigation.navigate(screen);
 
@@ -24,6 +24,9 @@ const ChooseSong = ({ navigation }) => {
             ))
           }
       </View>
+      <TouchableOpacity onPress={setIsAuthenticated(false)} style={styles.button}>
+        <Text style={styles.textfont}>Logout</Text>
+      </TouchableOpacity>
     </View>
   )
 };
