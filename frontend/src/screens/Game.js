@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ActivityIndicator, TouchableHighlight, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, StyleSheet, Image, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
-import * as Animatable from 'react-native-animatable';
 import { AWS_API_KEY, GET_GAME_START_METADATA_URL } from '@env';
 import { LoadingScreen } from './LoadingScreen';
 import { Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import ListenSongPlayback from '../components/ListenSongPlayback';
 
 const Game = () => {
+
+	const navigation = useNavigation();
 
 	// State variable for the user guess
 	const [guess, setGuess] = useState('');
@@ -16,7 +18,7 @@ const Game = () => {
 	const [metadata, setMetadata] = useState({});
 	
 	// State variables for the audio URLs
-	const [audioObjects, setAudioObjects] = useState([]);
+	const audioObjectsRef = useRef([]);
 	const [audioProgress, setAudioProgress] = useState(0);
 	const [soundUrls, setSoundUrls] = useState([]);
 
@@ -38,8 +40,19 @@ const Game = () => {
 		// Get the game metadata
 		fetchAudioAndMetadata();
 		// After 2 seconds set timeLoading to false
-		setTimeout(() => setTimeLoading(false), 2000);
-	}, []);
+		setTimeout(() => setTimeLoading(false), 1500);
+		// Kill all audio when leaving screen
+		const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+			// Prevent default behavior of leaving the screen
+			e.preventDefault();
+			// Call your stopAudio function
+			stopAudio().then(() => {
+			  // After stopping audio, continue with the navigation
+			  navigation.dispatch(e.data.action);
+			});
+		});
+		return unsubscribe;
+	}, [navigation]);
 
 	const fetchAudioAndMetadata = async () => {
 		try {
@@ -53,6 +66,7 @@ const Game = () => {
 			});
 			// Get the metadata of the game
 			const metadata = await response.json();
+			console.log(metadata)
 			// If there is no metadata, there is no songs available for the game
 			if (!metadata.urls) {
 				// Give alert to tell user they won
@@ -84,10 +98,7 @@ const Game = () => {
 	const playAudio = async () => {
 		try {
 			// Stop and unload any previous audio
-			await Promise.all(audioObjects.map(soundObj => soundObj.unloadAsync()));
-			// Set audio objects to an empty array (to fill again)
-			setAudioObjects([]);
-			setAudioProgress(0);
+			await stopAudio();
 			// Array to hold new audio objects
 			const newAudioObjects = [];
 			// Go through all sound layers (that are playing) and add them to the array
@@ -109,7 +120,8 @@ const Game = () => {
 							if (progress > audioProgress) setAudioProgress(progress);
 						}
 						if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-							// Handle finish
+							// Unload the audio object
+							sound.unloadAsync();
 						}
 					}
 				});
@@ -121,7 +133,7 @@ const Game = () => {
 			// Use Promise.all to play all sounds at the same time
 			await Promise.all(playPromises);
 			// Set audio objects array
-			setAudioObjects(newAudioObjects);
+			audioObjectsRef.current = [...newAudioObjects];
 		}
 		catch (error) {
 			// Handle the error
@@ -130,19 +142,20 @@ const Game = () => {
 
 	const stopAudio = async () => {
 		try {
-			// Stop and unload any previous audio
-			await Promise.all(audioObjects.map(soundObj => soundObj.unloadAsync()));
-			// Set audio objects to an empty array
-			setAudioObjects([]);
+			// Stop all audio objects
+			await Promise.all(audioObjectsRef.current.map(soundObj => soundObj.stopAsync()));
+			await Promise.all(audioObjectsRef.current.map(soundObj => soundObj.unloadAsync()));
+			// Reset the audio objects
 			setAudioProgress(0);
-		}
-		catch (error) {
+			audioObjectsRef.current = [];
+		} catch (error) {
 			// Handle the error
 		}
-	
-	}
+	};
 
 	const handleGuessSubmit = () => {
+		// Stop all audio
+		stopAudio();
 		// Check if the guess is correct
 		if (guess.toLowerCase() === metadata.title.toLowerCase()) {
 			// Set did win to true
@@ -154,17 +167,17 @@ const Game = () => {
 		}
 		else {
 			// Debug console
-			console.log(`Guess: ${guess}, Number of guesses: ${numGuesses}`);
+			console.log(`Guess: ${guess}, Remaining Guesses: ${4 - numGuesses}`);
 			// Set the guess to an empty string
 			setGuess('');
 			// Add another instrument to the sound URLs depending on number of guesses
 			if (numGuesses === 0) {
-				setSoundUrls([metadata.urls.drum_url, metadata.urls.bass_url]);
+				setSoundUrls([metadata.urls.layer2_url]);
 				// Enable a hint for the genre
 				setHintGenre(true);
 			}
 			else if (numGuesses === 1) {
-				setSoundUrls([metadata.urls.drum_url, metadata.urls.bass_url, metadata.urls.other_url]);
+				setSoundUrls([metadata.urls.layer3_url]);
 				// Enable a hint for the album
 				setHintAlbum(true);
 			}
@@ -191,11 +204,20 @@ const Game = () => {
 
 	return (
 		<View style={styles.container}>
-			<Image
-                source={{ uri: metadata.album_art_url }}
-                style={styles.albumcover}
-				blurRadius={15-numGuesses*4}
-            />
+			{
+				metadata.album_art_url
+				?
+				<Image
+                	source={{ uri: metadata.album_art_url }}
+                	style={styles.albumcover}
+					blurRadius={15-numGuesses*4}
+            	/>
+				:
+				<Image
+					source={require("../../assets/album_placeholder.png")}
+					style={styles.albumcover}
+				/>
+			}
 			<View style={{flexDirection: 'row', width: '90%', height: 10, backgroundColor: '#FFF4E6'}}>
     			<View style={{flex: audioProgress, backgroundColor: '#BE9B7B'}} />
     			<View style={{flex: 1 - audioProgress, backgroundColor: '#FFF4E6'}} />
@@ -208,7 +230,7 @@ const Game = () => {
 					<Image style={styles.playstopbutton} source={require("../../assets/stop_button.png")}/>
 				</TouchableHighlight>
 			</View>
-			<View style={styles.numguessbox}><Text style={styles.numguesstext}>Number of Guesses: {numGuesses}</Text></View>
+			<View style={styles.numguessbox}><Text style={styles.numguesstext}>Remaining Guesses: {4 - numGuesses}</Text></View>
 			<View style={styles.hintcontainer}>
 				<View style={styles.hintbox}>{hintYear && <Text style={styles.textfont}>Year: {metadata.year}</Text>}</View>
 				<View style={styles.hintbox}>{hintGenre && <Text style={styles.textfont}>Genre: {metadata.genre}</Text>}</View>
@@ -225,7 +247,6 @@ const Game = () => {
             <TouchableOpacity style={styles.guessbox} onPress={handleGuessSubmit} >
 				<Text style={styles.guessfont}>Submit Guess</Text>
 			</TouchableOpacity>
-            
         </View>
 	);
 }

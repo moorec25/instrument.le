@@ -5,7 +5,7 @@ import * as SecureStore from "expo-secure-store";
 // Map of buttons to the screen they navigate to
 const screenMap = {
     'Play 🎶':     'Game',
-    'Listen 🎧':   'Auth',
+    'Listen 🎧':   'ChooseSong',
     'Separate ⚙️': 'FindSeparate'
 }
 

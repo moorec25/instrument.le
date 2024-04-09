@@ -1,4 +1,4 @@
-import { AWS_API_KEY, GET_PRESIGNED_S3_URL, POST_SONG_METADATA_URL } from '@env';
+import { AWS_API_KEY, GET_PRESIGNED_S3_URL, POST_SONG_METADATA_URL, GET_USER_SONGS_URL } from '@env';
 import { Alert } from 'react-native';
 
 /**
@@ -101,7 +101,7 @@ export async function getUserSongs(user_id) {
     // Put the body into the format expected by the AWS Lambda function (getUserSongs)
     let body = JSON.stringify({ user_id });
     // Print message to console
-    console.log(`Getting user songs with body: ${body}`);
+    console.log(`Getting user songs with body: ${body}, ${GET_USER_SONGS_URL}`);
     try {
         // Make a POST request to the API
         const response = await fetch(GET_USER_SONGS_URL, {
