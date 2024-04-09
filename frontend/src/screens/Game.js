@@ -9,7 +9,6 @@ import ListenSongPlayback from '../components/ListenSongPlayback';
 
 const Game = () => {
 
-	const navigation = useNavigation();
 
 	// State variable for the user guess
 	const [guess, setGuess] = useState('');
@@ -53,6 +52,13 @@ const Game = () => {
 		});
 		return unsubscribe;
 	}, [navigation]);
+
+
+	const navigation = useNavigation();
+
+	const navigateToHome = () => {
+		navigation.navigate('Home'); // Navigate to the 'Home' screen
+	};
 
 	const fetchAudioAndMetadata = async () => {
 		try {
@@ -204,49 +210,72 @@ const Game = () => {
 
 	return (
 		<View style={styles.container}>
-			{
-				metadata.album_art_url
+			{ gameOver
 				?
-				<Image
-                	source={{ uri: metadata.album_art_url }}
-                	style={styles.albumcover}
-					blurRadius={15-numGuesses*4}
-            	/>
+				<View style={styles.container}>
+					{ didWin
+					?
+					<View style={styles.endgamebox}>
+						<Text style={styles.endgamemsgfont}>Congratulations You Win</Text>
+					</View>
+					:
+					<View style={styles.endgamebox}>
+						<Text style={styles.endgamemsgfont}>Better Luck Next Time!</Text>
+					</View>
+					}
+					<TouchableOpacity onPress={navigateToHome} style={styles.guessbox}>
+						<Text style={styles.endgamebuttonfont}>To Home</Text>
+					</TouchableOpacity>
+				</View>
 				:
-				<Image
-					source={require("../../assets/album_placeholder.png")}
-					style={styles.albumcover}
+				<View style={styles.container}>
+				{
+					metadata.album_art_url
+					?
+					<Image
+						source={{ uri: metadata.album_art_url }}
+						style={styles.albumcover}
+						blurRadius={15-numGuesses*4}
+					/>
+					:
+					<Image
+						source={require("../../assets/album_placeholder.png")}
+						style={styles.albumcover}
+					/>
+				}
+				<View style={{flexDirection: 'row', width: '90%', height: 10, backgroundColor: '#FFF4E6'}}>
+					<View style={{flex: audioProgress, backgroundColor: '#BE9B7B'}} />
+					<View style={{flex: 1 - audioProgress, backgroundColor: '#FFF4E6'}} />
+				</View>
+				<View style={styles.playstopbuttoncontainer}>
+					<TouchableHighlight onPress={playAudio}>
+						<Image style={styles.playstopbutton} source={require("../../assets/play_button.png")}/>
+					</TouchableHighlight>
+					<TouchableHighlight onPress={stopAudio}>
+						<Image style={styles.playstopbutton} source={require("../../assets/stop_button.png")}/>
+					</TouchableHighlight>
+				</View>
+				<View style={styles.numguessbox}><Text style={styles.numguesstext}>Remaining Guesses: {4 - numGuesses}</Text></View>
+				<View style={styles.hintcontainer}>
+					<View style={styles.hintbox}>{hintYear && <Text style={styles.textfont}>Year: {metadata.year}</Text>}</View>
+					<View style={styles.hintbox}>{hintGenre && <Text style={styles.textfont}>Genre: {metadata.genre}</Text>}</View>
+				</View>
+				<View style={styles.hintcontainer}>
+					<View style={styles.hintbox}>{hintAlbum && <Text style={styles.textfont}>Album: {metadata.album}</Text>}</View>
+					<View style={styles.hintbox}>{hintArtist && <Text style={styles.textfont}>Artist: {metadata.artist}</Text>}</View>
+				</View>
+				<TextInput
+					style={[styles.input, styles.textfont]}
+					onChangeText={setGuess}
+					value={guess}
+					placeholder="Enter your guess"
+					placeholderTextColor="#FFF4E6"
 				/>
+				<TouchableOpacity style={styles.guessbox} onPress={handleGuessSubmit} >
+					<Text style={styles.guessfont}>Submit Guess</Text>
+				</TouchableOpacity>
+				</View>
 			}
-			<View style={{flexDirection: 'row', width: '90%', height: 10, backgroundColor: '#FFF4E6'}}>
-    			<View style={{flex: audioProgress, backgroundColor: '#BE9B7B'}} />
-    			<View style={{flex: 1 - audioProgress, backgroundColor: '#FFF4E6'}} />
-			</View>
-			<View style={styles.playstopbuttoncontainer}>
-				<TouchableHighlight onPress={playAudio}>
-					<Image style={styles.playstopbutton} source={require("../../assets/play_button.png")}/>
-				</TouchableHighlight>
-				<TouchableHighlight onPress={stopAudio}>
-					<Image style={styles.playstopbutton} source={require("../../assets/stop_button.png")}/>
-				</TouchableHighlight>
-			</View>
-			<View style={styles.numguessbox}><Text style={styles.numguesstext}>Remaining Guesses: {4 - numGuesses}</Text></View>
-			<View style={styles.hintcontainer}>
-				<View style={styles.hintbox}>{hintYear && <Text style={styles.textfont}>Year: {metadata.year}</Text>}</View>
-				<View style={styles.hintbox}>{hintGenre && <Text style={styles.textfont}>Genre: {metadata.genre}</Text>}</View>
-				<View style={styles.hintbox}>{hintAlbum && <Text style={styles.textfont}>Album: {metadata.album}</Text>}</View>
-				<View style={styles.hintbox}>{hintArtist && <Text style={styles.textfont}>Artist: {metadata.artist}</Text>}</View>
-			</View>
-			<TextInput
-                style={[styles.input, styles.textfont]}
-                onChangeText={setGuess}
-                value={guess}
-                placeholder="Enter your guess"
-				placeholderTextColor="#FFF4E6"
-            />
-            <TouchableOpacity style={styles.guessbox} onPress={handleGuessSubmit} >
-				<Text style={styles.guessfont}>Submit Guess</Text>
-			</TouchableOpacity>
         </View>
 	);
 }
@@ -279,7 +308,7 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 2,
         borderColor: '#FFF4E6',
-        width: '80%',
+        width: 300,
         padding: 10,
         margin: 10,
     },
@@ -345,6 +374,32 @@ const styles = StyleSheet.create({
 		color: '#FFF4E6',
         textAlign: 'left',
         fontSize: 15,
+	},
+	endgamebuttonfont:{
+        color: '#FFF4E6',
+        textAlign: 'center',
+        fontSize: 20,
+    },
+	endgamemsgfont: {
+		color: '#4B3832',
+		textAlign: 'center',
+		fontSize: 25,
+		padding: 25,
+
+	},
+	endgamebox: {
+		alignItems: 'center',
+		backgroundColor: '#BE9B7B',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 1,
+		borderColor: '#FFF4E6',
+		padding: 5,
+		marginTop: 5,
+        marginBottom: 5,
+        marginHorizontal: 3,
 	}
 });
 
