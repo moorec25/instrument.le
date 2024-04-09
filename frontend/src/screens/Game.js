@@ -41,17 +41,10 @@ const Game = () => {
 		// After 2 seconds set timeLoading to false
 		setTimeout(() => setTimeLoading(false), 1500);
 		// Kill all audio when leaving screen
-		const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-			// Prevent default behavior of leaving the screen
-			e.preventDefault();
-			// Call your stopAudio function
-			stopAudio().then(() => {
-			  // After stopping audio, continue with the navigation
-			  navigation.dispatch(e.data.action);
-			});
-		});
-		return unsubscribe;
-	}, [navigation]);
+		return () => {
+		  stopAudio();
+		}
+	}, []);
 
 
 	const navigation = useNavigation();
@@ -227,7 +220,7 @@ const Game = () => {
 						source={{ uri: metadata.album_art_url }}
 						style={styles.albumcover}
 					/>
-					<ListenSongPlayback label={'Full Song'} url={metadata.full_url} />
+					<ListenSongPlayback label={'Full Song'} url={metadata.urls.full_url} />
 					<View style={styles.hintcontainer}>
 						<View style={styles.endgamemetadata}><Text style={styles.textfont}>Year: {metadata.year}</Text></View>
 						<View style={styles.endgamemetadata}><Text style={styles.textfont}>Genre: {metadata.genre}</Text></View>

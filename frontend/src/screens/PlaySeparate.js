@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ActivityIndicator, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { Audio } from 'expo-av';
 import ListenSongPlayback from '../components/ListenSongPlayback';
 
