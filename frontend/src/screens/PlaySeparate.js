@@ -10,10 +10,21 @@ const PlaySeparate = ({ route }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.titlecontainer}><Text style={styles.titlefont}>{metadata.title}</Text></View>
-			<Image
-				source={{ uri: metadata.album_art_url }}
-				style={styles.albumcover}
-			/>
+      <View style={styles.imagecontainer}>
+        {
+        metadata.album_art_url
+        ?
+        <Image
+          source={{ uri: metadata.album_art_url }}
+          style={styles.albumcover}
+        />
+        :
+        <Image
+          source={require("../../assets/album_placeholder.png")}
+          style={styles.albumcover}
+        />
+        }
+      </View>
 			<ListenSongPlayback label={'Bass'} url={metadata.bass_url} />
 			<ListenSongPlayback label={'Drums'} url={metadata.drums_url} />
 			<ListenSongPlayback label={'Vocals'} url={metadata.vocals_url} />
@@ -35,8 +46,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#4B3832',
   },
-  tracklistcontainer: {
-    flexDirection: 'column',
+  imagecontainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
