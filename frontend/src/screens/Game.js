@@ -223,7 +223,18 @@ const Game = () => {
 						<Text style={styles.endgamemsgfont}>Better Luck Next Time!</Text>
 					</View>
 					}
-					<TouchableOpacity onPress={navigateToHome} style={styles.guessbox}>
+					<Image
+						source={{ uri: metadata.album_art_url }}
+						style={styles.albumcover}
+					/>
+					<ListenSongPlayback label={'Full Song'} url={metadata.full_url} />
+					<View style={styles.hintcontainer}>
+						<View style={styles.endgamemetadata}><Text style={styles.textfont}>Year: {metadata.year}</Text></View>
+						<View style={styles.endgamemetadata}><Text style={styles.textfont}>Genre: {metadata.genre}</Text></View>
+					</View>
+					<View style={styles.endgamemetadata}><Text style={styles.textfont}>Album: {metadata.album}</Text></View>
+					<View style={styles.endgamemetadata}><Text style={styles.textfont}>Artist: {metadata.artist}</Text></View>
+					<TouchableOpacity onPress={navigateToHome} style={styles.endgamebuttonbox}>
 						<Text style={styles.endgamebuttonfont}>To Home</Text>
 					</TouchableOpacity>
 				</View>
@@ -290,8 +301,8 @@ const styles = StyleSheet.create({
     albumcover: {
         width: 300,
         height: 300,
-        marginBottom: 25,
-		borderRadius: 25,
+        marginBottom: 20,
+		borderRadius: 20,
     },
 	playstopbutton: {
         width: 50,
@@ -319,7 +330,7 @@ const styles = StyleSheet.create({
 	},
 	guessbox: {
         alignItems: 'center',
-		backgroundColor: '#BE9B7B',
+		backgroundColor: '#854442',
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         borderBottomLeftRadius: 10,
@@ -340,7 +351,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-		backgroundColor: '#3C2F2F'
 	},
 	hintbox: {
         alignItems: 'center',
@@ -381,13 +391,39 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
 	endgamemsgfont: {
-		color: '#4B3832',
+		color: '#FFF4E6',
 		textAlign: 'center',
-		fontSize: 25,
-		padding: 25,
+		fontSize: 20,
+		padding: 10,
 
 	},
 	endgamebox: {
+		alignItems: 'center',
+		backgroundColor: '#BE9B7B',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 15,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 1,
+		borderColor: '#FFF4E6',
+        marginBottom: 15,
+        marginHorizontal: 2,
+	},
+	endgamebuttonbox: {
+        alignItems: 'center',
+		backgroundColor: '#854442',
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+		borderWidth: 1,
+		borderColor: '#FFF4E6',
+		padding: 10,
+		marginTop: 5,
+        marginBottom: 8,
+        marginHorizontal: 25,
+	},
+	endgamemetadata: {
 		alignItems: 'center',
 		backgroundColor: '#BE9B7B',
         borderTopLeftRadius: 10,

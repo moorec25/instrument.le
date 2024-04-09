@@ -18,15 +18,22 @@ const App = () => {
   return (
     <NavigationContainer>
     	<Stack.Navigator
-    	  screenOptions={({ navigation }) => ({
-    	    headerLeft: () => (
-    	      <Button
-    	        onPress={() => navigation.goBack()}
-    	        title="Back"
-    	        color="#000"
-    	      />
-    	    )
-    	    })}
+    	  screenOptions={{
+    	    // headerLeft: () => (
+			// <Button
+			// 	onPress={() => navigation.goBack()}
+			// 	title="Back"
+			// 	color="#000"
+			// />
+    	    // ),
+			headerBackTitleVisible: true,
+			headerBackTitle: "Back",
+			headerTintColor: "#FFF4E6",
+			headerStyle: {
+				backgroundColor: "#854442",
+			},
+			headerTitle: ""
+    	    }}
     	>
     	  <Stack.Screen name="Home" component={Home} options={{ headerLeft: () => null, headerShown: false }} />
     	  <Stack.Screen name="Game" component={Game} />
